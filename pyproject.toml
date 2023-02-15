@@ -9,6 +9,8 @@ packages = [{include = "30122_project_snow_lm"}]
 [tool.poetry.dependencies]
 python = "^3.8"
 pandas = "^1.5.3"
+requests = "^2.28.2"
+lxml = "^4.9.2"
 
 
 [build-system]
