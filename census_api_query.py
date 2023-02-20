@@ -45,7 +45,7 @@ See below for descriptions of each variable:
 #DP03_0051E = income and poverty (median household income); Estimate!!INCOME AND BENEFITS (IN 2018 INFLATION-ADJUSTED DOLLARS)!!Total households
 #DP03_0095E = health (without health care coverage); Estimate!!HEALTH INSURANCE 
 #DP02_0058E = education (bachelor's degree or higher); Estimate!!EDUCATIONAL ATTAINMENT!!Population 25 years and over
-#DP05_0033E = Estimate!!RACE!!Total population
+#DP05_0033E = Estimate!!RACE!!Total population #ummm this isn't categorical data?? what else do we need?
 #additional geocodes???
 '''
 
@@ -67,16 +67,23 @@ census_json = response.json()
 #census_df = pd.read_json(census_json) #do you need to import something json related? this file doesn't import if you don't have this commented out :/
 #census_df = pd.read_json(census_json[1:])
 
+#helpful youtube video:
+#https://www.youtube.com/watch?v=l47HptzM7ao
+
+#column_names = census_json[0]
+column_names = ["name", "total_households", "total_households_pr", "employment_rate", "median_household_income",
+    "without_healthcare_coverage", "bach_or_higher", "race", "state", "country"]
+#print(column_names)
+census_df = pd.DataFrame(columns = column_names, data = census_json[1:])
+print(census_df)
+
+
 #Cleaning variable names in the df 
 #(e.g., it would be nice if the variables had descriptive variable names):
 
 
-#Checking variable types and making any revisions necessary:
+#Checking variable types and making any revisions necessary: // note: every single number is in double quotes
 
 
 #Save df to CSV:
 #census_df.to_csv('30122-project-snow-lm/census_demographic_data.csv')
-
-
-#helpful youtube video:
-#https://www.youtube.com/watch?v=l47HptzM7ao
