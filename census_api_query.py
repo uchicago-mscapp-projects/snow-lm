@@ -1,6 +1,8 @@
-#CAPP 30122
-#Team: Snow Laughing Matter
-#Code for querying the U.S. Census' API
+'''
+CAPP 30122
+Team: Snow Laughing Matter
+Code for querying the U.S. Census' API
+'''
 
 import re
 import pathlib
@@ -29,7 +31,7 @@ get = "?get="
 query_url += get
 
 #5. Add variables:
-list_of_vars = "NAME,DP02_0001E,DP02PR_0001E,DP03_0001E,DP03_0051E,DP03_0095E,DP02_0058E,DP05_0033E" #is this list complete?
+list_of_vars = "NAME,DP02_0001E,DP02PR_0001E,DP03_0001E,DP03_0051E,DP03_0095E,DP02_0058E,DP05_0033E" #IS THIS LIST COMPLETE?
 query_url += list_of_vars
 
 '''
@@ -46,36 +48,26 @@ See below for descriptions of each variable:
 '''
 
 #6. Add geographies:
-#geo = "&for=state*"
-#geo = "&for=county:*&in=state:*"
 geo = "&for=county:*"
 query_url += geo
 
-#Census API key requested from the U.S. Census for this project
+#7. Add census API key for this project:
 census_api_key = "&key=dbaf6b8c0aa053d4df5ae844bba98940952fc50b"
 query_url += census_api_key
 
-#Request data using the full query url
+#Request data using the full query url:
 response = requests.get(query_url)
 census_json = response.json()
 
-#save to a data frame
+#Save census data to a pandas dataframe:
 #census_df = 
 
-#some light cleaning of the variables in the dataframe (e.g., it would be nice if the variables had descriptive variable names)
+#Cleaning variable names in the df 
+#(e.g., it would be nice if the variables had descriptive variable names):
 
-#save df to csv
+
+#Checking variable types and making any revisions necessary:
 
 
-#manually constructed link
-https://api.census.gov/data/2021/acs/acs5?get=DP02_0001E,DP02PR_0001E,DP03_0001E,DP03_0051E,DP03_0095E,DP02_0058E,DP05_0033E&for=county:*&in=state:*&key=dbaf6b8c0aa053d4df5ae844bba98940952fc50b
-#^error: error: unknown variable 'DP02_0001E'
+#Save df to CSV:
 
-#attempt 2, after deleting above variable
-https://api.census.gov/data/2021/acs/acs5?get=DP02PR_0001E,DP03_0001E,DP03_0051E,DP03_0095E,DP02_0058E,DP05_0033E&for=county:*&in=state:*&key=dbaf6b8c0aa053d4df5ae844bba98940952fc50b
-#^error: error: unknown variable 'DP02PR_0001E'
-
-#additional attempts: adding NAME to list of vars, deleting state from geo, acs1
-
-#this one runs:
-https://api.census.gov/data/2021/acs/acs5/profile?get=NAME,DP02PR_0001E,DP03_0001E,DP03_0051E,DP03_0095E,DP02_0058E,DP05_0033E&for=county:*&key=dbaf6b8c0aa053d4df5ae844bba98940952fc50b
