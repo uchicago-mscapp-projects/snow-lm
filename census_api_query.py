@@ -2,13 +2,15 @@
 CAPP 30122
 Team: Snow Laughing Matter
 Code for querying the U.S. Census' API
+
+https://www.census.gov/data/developers/data-sets/acs-5year.html
 '''
 
 import re
 import pathlib
 import pandas as pd
 import requests
-#anything else we need to import?
+#ANYTHING ELSE TO IMPORT?
 
 #Assemble components of this query by following these steps:
 #1. Start query with the host name:
@@ -59,8 +61,11 @@ query_url += census_api_key
 response = requests.get(query_url)
 census_json = response.json()
 
+#print(census_json)
+
 #Save census data to a pandas dataframe:
-#census_df = 
+#census_df = pd.read_json(census_json) #do you need to import something json related? this file doesn't import if you don't have this commented out :/
+#census_df = pd.read_json(census_json[1:])
 
 #Cleaning variable names in the df 
 #(e.g., it would be nice if the variables had descriptive variable names):
@@ -70,4 +75,8 @@ census_json = response.json()
 
 
 #Save df to CSV:
+#census_df.to_csv('30122-project-snow-lm/census_demographic_data.csv')
 
+
+#helpful youtube video:
+#https://www.youtube.com/watch?v=l47HptzM7ao
