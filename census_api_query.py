@@ -9,14 +9,14 @@ import requests
 #anything else we need to import?
 
 #Assemble components of this query by following these steps:
-
-#1. Start your query with the host name:
+#1. Start query with the host name:
 host_name = "https://api.census.gov/data"
+query_url = host_name
 
 #2. Add the data year to the query:
 #https://api.census.gov/data/2021
 data_year = "/2021"
-query_url = host_name + data_year
+query_url += data_year
 
 #3. Add the dataset name acronym:
 #https://api.census.gov/data/2019/acs/acs5
@@ -25,31 +25,37 @@ query_url += dataset_name_acronym
 
 #4. Add ?get= to the query:
 #https://api.census.gov/data/2021/acs/acs5/profile?get=
+get = "?get="
+query_url += get
 
-#5. Add your variables:
-list_of_vars = "NAME,DP02_0001E,DP02PR_0001E,DP03_0001E,DP03_0051E,DP03_0095E,DP02_0058E,DP05_0033E" #note that this list isn't complete
+#5. Add variables:
+list_of_vars = "NAME,DP02_0001E,DP02PR_0001E,DP03_0001E,DP03_0051E,DP03_0095E,DP02_0058E,DP05_0033E" #is this list complete?
+query_url += list_of_vars
 
-#NAME
-# = total population
-
+'''
+See below for descriptions of each variable:
+#NAME = name of location
 #DP02_0001E = total households
-#DP02PR_0001E = total households in puerto rico
+#DP02PR_0001E = total households in puerto rico - cut this one?
 #DP03_0001E = employment (employment rate); Estimate!!EMPLOYMENT STATUS!!Population 16 years and over
 #DP03_0051E = income and poverty (median household income); Estimate!!INCOME AND BENEFITS (IN 2018 INFLATION-ADJUSTED DOLLARS)!!Total households
 #DP03_0095E = health (without health care coverage); Estimate!!HEALTH INSURANCE 
 #DP02_0058E = education (bachelor's degree or higher); Estimate!!EDUCATIONAL ATTAINMENT!!Population 25 years and over
 #DP05_0033E = Estimate!!RACE!!Total population
+#additional geocodes???
+'''
 
-
-#6. Add your geographies:
-#https://api.census.gov/data/2021/acs/acs5/profile/examples.html
+#6. Add geographies:
 #geo = "&for=state*"
-geo = "&for=county:*&in=state:*"
+#geo = "&for=county:*&in=state:*"
+geo = "&for=county:*"
+query_url += geo
 
 #Census API key requested from the U.S. Census for this project
-census_api_key = dbaf6b8c0aa053d4df5ae844bba98940952fc50b
+census_api_key = "&key=dbaf6b8c0aa053d4df5ae844bba98940952fc50b"
+query_url += census_api_key
 
-#query_url = f"{host}{year}{dataset_acronym}{g}{variables}{location}{usr_key}" #fix these variables
+#Request data using the full query url
 response = requests.get(query_url)
 census_json = response.json()
 
