@@ -37,7 +37,7 @@ list_of_vars = "NAME,DP02_0001E,DP02PR_0001E,DP03_0001E,DP03_0051E,DP03_0095E,DP
 query_url += list_of_vars
 
 '''
-See below for descriptions of each variable:
+See below for descriptions of each variable: NEED TO CLEAN UP
 #NAME = name of location
 #DP02_0001E = total households
 #DP02PR_0001E = total households in puerto rico - cut this one?
@@ -64,26 +64,16 @@ census_json = response.json()
 #print(census_json)
 
 #Save census data to a pandas dataframe:
-#census_df = pd.read_json(census_json) #do you need to import something json related? this file doesn't import if you don't have this commented out :/
-#census_df = pd.read_json(census_json[1:])
-
 #helpful youtube video:
 #https://www.youtube.com/watch?v=l47HptzM7ao
 
-#column_names = census_json[0]
 column_names = ["name", "total_households", "total_households_pr", "employment_rate", "median_household_income",
     "without_healthcare_coverage", "bach_or_higher", "race", "state", "country"]
-#print(column_names)
 census_df = pd.DataFrame(columns = column_names, data = census_json[1:])
 print(census_df)
-
-
-#Cleaning variable names in the df 
-#(e.g., it would be nice if the variables had descriptive variable names):
-
 
 #Checking variable types and making any revisions necessary: // note: every single number is in double quotes
 
 
 #Save df to CSV:
-#census_df.to_csv('30122-project-snow-lm/census_demographic_data.csv')
+census_df.to_csv("census_demographic_data.csv")
