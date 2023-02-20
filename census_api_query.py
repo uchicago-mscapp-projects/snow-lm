@@ -68,12 +68,22 @@ census_json = response.json()
 #https://www.youtube.com/watch?v=l47HptzM7ao
 
 column_names = ["name", "total_households", "total_households_pr", "employment_rate", "median_household_income",
-    "without_healthcare_coverage", "bach_or_higher", "race", "state", "country"]
+    "without_healthcare_coverage", "bach_or_higher", "race", "state", "county"]
 census_df = pd.DataFrame(columns = column_names, data = census_json[1:])
 print(census_df)
 
-#Checking variable types and making any revisions necessary: // note: every single number is in double quotes
+#Checking variable types and making any revisions necessary:
+census_df["total_households"] = census_df["total_households"].astype(float)
+census_df["total_households_pr"] = census_df["total_households_pr"].astype(float)
+census_df["employment_rate"] = census_df["employment_rate"].astype(float)
+census_df["median_household_income"] = census_df["median_household_income"].astype(float)
+census_df["without_healthcare_coverage"] = census_df["without_healthcare_coverage"].astype(float)
+census_df["bach_or_higher"] = census_df["bach_or_higher"].astype(float)
+census_df["race"] = census_df["race"].astype(float)
 
+#print(census_df)
+#result = census_df.dtypes
+#print(result) #--> note: every variable was initially an "object" data type
 
 #Save df to CSV:
 census_df.to_csv("census_demographic_data.csv")
