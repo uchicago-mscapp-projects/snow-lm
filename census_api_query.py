@@ -1,6 +1,7 @@
 '''
 CAPP 30122
 Team: Snow Laughing Matter
+Primary Author: Jennifer Yeaton
 Code for querying the U.S. Census' API
 
 https://www.census.gov/data/developers/data-sets/acs-5year.html
@@ -10,7 +11,6 @@ import re
 import pathlib
 import pandas as pd
 import requests
-#ANYTHING ELSE TO IMPORT?
 
 #Assemble components of this query by following these steps:
 #1. Start query with the host name:
@@ -33,20 +33,28 @@ get = "?get="
 query_url += get
 
 #5. Add variables:
-list_of_vars = "NAME,DP02_0001E,DP02PR_0001E,DP03_0001E,DP03_0051E,DP03_0095E,DP02_0058E,DP05_0033E" #IS THIS LIST COMPLETE?
+list_of_vars = "NAME,DP02_0001E,DP02PR_0001E,DP03_0009PE,DP03_0062E,DP03_0096PE,DP03_0099PE,DP02_0067PE,DP05_0037PE,DP05_0038PE,DP05_0039PE,DP05_0044PE,DP05_0052PE,DP05_0057PE,DP05_0058PE"
 query_url += list_of_vars
 
 '''
-See below for descriptions of each variable: NEED TO CLEAN UP
+See below for descriptions of each variable:
 #NAME = name of location
 #DP02_0001E = total households
-#DP02PR_0001E = total households in puerto rico - cut this one?
-#DP03_0001E = employment (employment rate); Estimate!!EMPLOYMENT STATUS!!Population 16 years and over
-#DP03_0051E = income and poverty (median household income); Estimate!!INCOME AND BENEFITS (IN 2018 INFLATION-ADJUSTED DOLLARS)!!Total households
-#DP03_0095E = health (without health care coverage); Estimate!!HEALTH INSURANCE 
-#DP02_0058E = education (bachelor's degree or higher); Estimate!!EDUCATIONAL ATTAINMENT!!Population 25 years and over
-#DP05_0033E = Estimate!!RACE!!Total population #ummm this isn't categorical data?? what else do we need?
-#additional geocodes???
+#DP02PR_0001E = total households in puerto rico
+#DP03_0009PE = Percent Estimate!!EMPLOYMENT STATUS!!Civilian labor force!!Unemployment Rate
+
+#DP03_0062E = Estimate!!INCOME AND BENEFITS (IN 2018 INFLATION-ADJUSTED DOLLARS)!!Total households!!Median household income (dollars)
+#DP03_0096PE = Percent Estimate!!HEALTH INSURANCE COVERAGE!!Civilian noninstitutionalized population!!With health insurance coverage
+#DP03_0099PE = Percent Estimate!!HEALTH INSURANCE COVERAGE!!Civilian noninstitutionalized population!!No health insurance coverage
+#DP02_0067PE = Percent Estimate!!EDUCATIONAL ATTAINMENT!!Population 25 years and over!!Bachelor's degree or higher
+
+#DP05_0037PE = Percent Estimate!!RACE!!Total population!!One race!!White
+#DP05_0038PE = Percent Estimate!!RACE!!Total population!!One race!!Black or African American
+#DP05_0039PE = Percent Estimate!!RACE!!Total population!!One race!!American Indian and Alaska Native
+#DP05_0044PE = Percent Estimate!!RACE!!Total population!!One race!!Asian
+#DP05_0052PE = Percent Estimate!!RACE!!Total population!!One race!!Native Hawaiian and Other Pacific Islander	
+#DP05_0057PE = Percent Estimate!!RACE!!Total population!!One race!!Some other race
+#DP05_0058PE = 	Percent Estimate!!RACE!!Total population!!Two or more races
 '''
 
 #6. Add geographies:
@@ -67,23 +75,35 @@ census_json = response.json()
 #helpful youtube video:
 #https://www.youtube.com/watch?v=l47HptzM7ao
 
-column_names = ["name", "total_households", "total_households_pr", "employment_rate", "median_household_income",
-    "without_healthcare_coverage", "bach_or_higher", "race", "state", "county"]
+column_names = ["name", "total_households", "total_households_pr", "percent_unemployed", "median_household_income",
+    "with_healthcare_coverage", "without_healthcare_coverage", "bach_or_higher", "percent_white", "percent_blackORaa", 
+    "percent_ai_and_an", "percent_asian", "percent_nh_and_pi", "percent_race_other", "percent_race_two_more", "state", "county"]
 census_df = pd.DataFrame(columns = column_names, data = census_json[1:])
-print(census_df)
+#print(census_df)
 
 #Checking variable types and making any revisions necessary:
 census_df["total_households"] = census_df["total_households"].astype(float)
 census_df["total_households_pr"] = census_df["total_households_pr"].astype(float)
-census_df["employment_rate"] = census_df["employment_rate"].astype(float)
+census_df["percent_unemployed"] = census_df["percent_unemployed"].astype(float)
 census_df["median_household_income"] = census_df["median_household_income"].astype(float)
+census_df["with_healthcare_coverage"] = census_df["with_healthcare_coverage"].astype(float)
 census_df["without_healthcare_coverage"] = census_df["without_healthcare_coverage"].astype(float)
 census_df["bach_or_higher"] = census_df["bach_or_higher"].astype(float)
-census_df["race"] = census_df["race"].astype(float)
+census_df["percent_white"] = census_df["percent_white"].astype(float)
+census_df["percent_blackORaa"] = census_df["percent_blackORaa"].astype(float)
+census_df["percent_ai_and_an"] = census_df["percent_ai_and_an"].astype(float)
+census_df["percent_asian"] = census_df["percent_asian"].astype(float)
+census_df["percent_nh_and_pi"] = census_df["percent_nh_and_pi"].astype(float)
+census_df["percent_race_other"] = census_df["percent_race_other"].astype(float)
+census_df["percent_race_two_more"] = census_df["percent_race_two_more"].astype(float)
 
-#print(census_df)
-#result = census_df.dtypes
-#print(result) #--> note: every variable was initially an "object" data type
+
+#Add a variable that is a concatenation of the state code and the county code
+census_df["state_and_county_code"] = census_df["state"] + census_df["county"]
+
+print(census_df)
+result = census_df.dtypes
+print(result) #--> note: every variable was initially an "object" data type
 
 #Save df to CSV:
-census_df.to_csv("census_demographic_data.csv")
+census_df.to_csv("census_demographic_data.csv", index = False)
