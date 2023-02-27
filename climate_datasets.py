@@ -21,29 +21,32 @@ def get_cleaned_data(raw_data_path):
     disasters = disasters_raw[['disasterNumber', 'state','fipsStateCode',
     'fipsCountyCode','declarationDate','incidentType','paProgramDeclared',
     'incidentBeginDate','incidentEndDate']]
-    pass
 
+    #renaming columns
+    disasters.columns = ['disaster_number', 'state', 'state_code',
+                          'county_code','dec_date',
+                        'disaster_type', 'pa_program',
+                        'begin_date', 'end_date']
+    
+    #keeping only climate related disasterrs
+    disaster_type_list = disasters.disaster_type.unique().tolist()
+    #non-climate related disasterrs
+    unwanted_disasters = ['Biological','Toxic Substances','Chemical',
+                          'Terrorist','Human Cause','Fishing Losses']
+    climate_disasters_list = [ele for ele in disaster_type_list 
+                              if ele not in unwanted_disasters]
+    climate_disasters = disasters.loc[disasters['disaster_type']
+                                      .isin(climate_disasters_list)]
 
-#keeping only required columns
-disasters = disasters_raw[['disasterNumber', 'state','fipsStateCode','fipsCountyCode','placeCode','declarationDate','fyDeclared','incidentType',
-    'ihProgramDeclared','iaProgramDeclared','paProgramDeclared','hmProgramDeclared',
-    'incidentBeginDate','incidentEndDate','designatedArea']]
+    #subsetting into last 23 years (2000-2023)
+    climate_disasters["dec_date"] = pd.to_datetime(climate_disasters["dec_date"])
+    climate_disasters['year'] = climate_disasters['dec_date'].dt.strftime('%Y')
+    climate_last_23 = climate_disasters.loc[(climate_disasters['year'] >= '2000')
+                     & (climate_disasters['year'] <= '2023')]
+    return climate_last_23
 
-# only keeping climate related disasters
-unwanted_disasters = ['Fire', 'Biological','Toxic Substances','Chemical','Terrorist','Human Cause','Fishing Losses']
-climate_disasters_list = [ele for ele in disaster_type_list if ele not in unwanted_disasters]
-climate_disasters = disasters.loc[disasters['incidentType'].isin(climate_disasters_list)]
-
-# adding a year column
-climate_disasters["declarationDate"] = pd.to_datetime(climate_disasters["declarationDate"])
-climate_disasters['Year'] = climate_disasters['declarationDate'].dt.strftime('%Y')
-
-#subsetting the data into the last 23 years (2000-2023)
-climate_last_23 = climate_disasters.loc[(climate_disasters['Year'] >= '2000')
-                     & (climate_disasters['Year'] <= '2023')]
-
-#renaming columns
-climate_last_23.columns = ['record_id', 'disaster_number', 'state', 'state_code',
-                          'county_code','place_code','dec_date', 'fiscal_year',
-                        'disaster_type','ih_program','ia_program', 'pa_program',
-                        'hm_progam','begin_date', 'end_date', 'area_name','year']
+def list_of_disaster_numbers(climate_last_23):
+    '''
+    Inputs a pandas dataframe and returns a list of all disasters
+    '''
+    return climate_last_23.disaster_number.unique().tolist()
