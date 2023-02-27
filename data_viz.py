@@ -9,30 +9,30 @@ import pandas as pd
 import numpy as np
 import json
 
+def create_state_map(): 
+    data = pd.read_csv('climate_disasters_2000_2023_clean.csv')
 
-#data = pd.read_csv('climate_disasters_2000_2023_clean.csv')
-
-# # USA Map aggregated by Incident Type
-# fig = px.choropleth(data, locations='state',
-#                     locationmode="USA-states", color='disaster_type', scope="usa")
- 
-# fig.show()
+    # USA Map aggregated by Incident Type
+    fig = px.choropleth(data, locations='state',
+                        locationmode="USA-states", color='disaster_type', scope="usa")
+    
+    fig.show()
 
 
 # County Level Map for California
-# def create_county_level_map():
+def create_county_level_map():
 
-#     data = pd.read_csv('disaster_declarations.csv')
+    data = pd.read_csv('climate_disasters_2000_2023_clean.csv')
 
-#     df = data[data['state'] == 'CA']
+    df = data[data['state'] == 'CA']
 
-#     values = df['incidentType'].tolist()
-#     fips = df['fipsCountyCode'].tolist()
+    values = df['incidentType'].tolist()
+    fips = df['fipsCountyCode'].tolist()
 
-#     fig = ff.create_choropleth(fips=fips, values=values)
-#     fig.layout.template = None
+    fig = ff.create_choropleth(fips=fips, values=values)
+    fig.layout.template = None
 
-#     return fig.show()
+    fig.show()
 
 # d = data.loc[:, ['state', 'incidentType', 'fipsStateCode', 'fipsCountyCode']]
 # d.incidentType.value_counts()
