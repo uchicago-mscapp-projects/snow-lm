@@ -1,15 +1,4 @@
 import pandas as pd
-#Func 1: get_cleaned_data(raw_data_path): converts the raw data into a 
-# dataframe that can be used for screen 1 and screen 2
-
-# func 2: climate_events_per_year(cleaned_data): Takes cleaned data dataframe
-# and converts it to only the things needed for screen 1, returns that
-
-# func 3: climate disasters in the state- for each state- what disasters took 
-# place- takes the cleaned dataframe from 1 and computes
-
-# func 4: Length of time in disaster state: Takes from one and computes lenght
-# of time and returns the dataframe.
 
 #importing dataset
 #"disaster_declarations.csv"
@@ -40,7 +29,8 @@ def get_cleaned_data(raw_data_path):
     # removing severe storm(s) since they are only 4 which are statewide emergencies 
     # that are already covered by severe storm, duplicates for our purposes.
     unwanted_disasters = ['Biological','Toxic Substances','Chemical',
-                          'Terrorist','Human Cause','Fishing Losses', 'Severe Storm(s)']
+                          'Terrorist','Human Cause','Fishing Losses',
+                            'Severe Storm(s)']
     climate_disasters_list = [ele for ele in disaster_type_list 
                               if ele not in unwanted_disasters]
     climate_disasters = disasters.loc[disasters['disaster_type']
@@ -50,10 +40,12 @@ def get_cleaned_data(raw_data_path):
     climate_disasters["dec_date"] = pd.to_datetime(climate_disasters["dec_date"])
     climate_disasters['year'] = climate_disasters['dec_date'].dt.strftime('%Y')
     climate_last_23 = climate_disasters.loc[(climate_disasters['year'] >= '2000')
-                     & (climate_disasters['year'] <= '2023')]
+                     & (climate_disasters['year'] < '2023')]
     
-    #remove records that have 0's in the county code- they are ones that are state-wide
-    climate_last_23.drop(climate_last_23[climate_last_23['county_code'] == 0].index, inplace = True)
+    #remove records that have 0's in the county code- they are ones that are 
+    # state-wide disasters and are already covered by other rows. 
+    climate_last_23.drop(climate_last_23[climate_last_23['county_code'] == 0].index,
+                          inplace = True)
     
     return climate_last_23
 
@@ -65,44 +57,97 @@ def list_of_disaster_numbers(climate_df):
 
 def counties_affected_by_disasters(climate_df):
     '''
-    Inputs a pandas dataframe and returns a list of cleaned county codes that
-    are affected by climate related disasters over the last 23 years. 
+    Inputs a pandas dataframe (the output of running 
+        get_cleaned_data(raw_data_path)) and returns a list of cleaned county 
+        codes that are affected by climate related disasters over 
+        the last 23 years. 
     '''
     # adding leading 0's to each state code
 
-    #climate_last_23['state_code'] = list(map(lambda x: x.zfill(1), climate_last_23['state_code']))
+    #climate_last_23['state_code'] = list(map(lambda x: x.zfill(1), 
+    # climate_last_23['state_code']))
     climate_df["state_code"] = climate_df.state_code.map("{:02}".format)
-    #climate_last_23["state_code"] = climate_last_23.state_code.map("{:02}".format)
-    #print(climate_last_23["state_code"])
 
     # ensuring each county code has 3 digits and a leading zero where needed
     climate_df["county_code"] = climate_df.county_code.map("{:03}".format)
-    #climate_last_23['county_code'] = list(map(lambda x: x.zfill(2), climate_last_23['county_code']))
+    #climate_last_23['county_code'] = list(map(lambda x: x.zfill(2), 
+    # climate_last_23['county_code']))
+
     # merging it into a full county code
-    
-    climate_df['full_county_code'] = climate_df['state_code'] + climate_df['county_code']
+    climate_df['full_county_code'] = climate_df['state_code'] + climate_df[
+        'county_code']
     
     return climate_df.full_county_code.unique().tolist()
 
 def number_of_disaster_events_by_state(climate_df):
     '''
-    Inputs a pandas dataframe and provides a dataframe of the number of disaster
-    events by state.
+    Inputs a pandas dataframe(the output of running 
+        get_cleaned_data(raw_data_path)) and provides a dataframe of the number
+        of disaster events by state.
     '''
     # removing unneccessary columns
-    climate_summary = climate_df.drop(columns=['state_code','county_code','dec_date','pa_program', 'begin_date', 'end_date'])
+    climate_summary = climate_df.drop(columns=['state_code','county_code',
+                                               'dec_date','pa_program',
+                                                 'begin_date', 'end_date'])
 
-    #only keep one county row per disaster- since we just need to find the total number of events
-    climate_summary = climate_summary.drop_duplicates(subset ='disaster_number', keep = "first")
+    #only keep one county row per disaster- since we just need to find the total
+    # number of events
+    climate_summary = climate_summary.drop_duplicates(subset ='disaster_number',
+                                                       keep = "first")
 
     #reordering the columns
     climate_summary = climate_summary[['year','state','disaster_type']]
 
-    # getting the total number of events in each state by incident type- just the duplicate rows
-    climate_summary = climate_summary.groupby(climate_summary.columns.tolist(),as_index=False).size()
+    # getting the total number of events in each state by incident type- just 
+    # the duplicate rows
+    climate_summary = climate_summary.groupby(climate_summary.columns.tolist(),
+                                              as_index=False).size()
 
     #renaming the size column. 
-    climate_summary.rename(columns = {"size": "total_number_of_events"}, inplace = True)
+    climate_summary.rename(columns = {"size": "total_number_of_events"}, 
+                           inplace = True)
     
     return climate_summary
 
+def number_of_days_in_dec_disaster(climate_df):
+    '''
+    Takes in a cleaned pandas dataframe and returns a dictonary that maps the
+    average number of days per year that a state has been in a disaster 
+    scenario.
+    '''
+    # removing unneccessary columns
+    climate_state = climate_df.drop(columns=['state_code','county_code',
+                                               'dec_date','pa_program'])
+    
+    # checking len of begin_date and end_date
+    len(climate_state.begin_date.value_counts())
+    len(climate_state.end_date.value_counts())
+
+    # remove all disasters that did not have either a begin date or end date
+    climate_state.shape[0]
+    climate_state_no_na=climate_state.dropna(subset=['begin_date','end_date'])
+    climate_state_no_na.shape[0]
+    # converting both end date and begin date to 
+    climate_state_no_na['end_date']= pd.to_datetime(
+        climate_state_no_na['end_date'])
+    climate_state_no_na['begin_date']= pd.to_datetime(
+        climate_state_no_na['begin_date'])
+    climate_state_no_na['length_of_disaster'] = (
+        climate_state_no_na['end_date'] - 
+        climate_state_no_na['begin_date']).dt.days
+
+    #only keep one county row per disaster- since we just need to find the total
+    # number of events
+    climate_state_no_na = climate_state_no_na.drop_duplicates(
+        subset ='disaster_number',keep = "first")
+   
+    climate_grouped_by_state = climate_state_no_na.groupby(
+        ['state', 'year'], as_index = False)['length_of_disaster'].mean()
+    climate_grouped_by_state = climate_grouped_by_state.groupby(
+        ['state'], as_index = False)['length_of_disaster'].mean()
+    
+    # a dict with states as keys and values as the average length of the disaster
+    climate_dict= dict(zip(climate_grouped_by_state.state,
+                            climate_grouped_by_state.length_of_disaster))
+
+    return climate_dict
