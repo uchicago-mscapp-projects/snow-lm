@@ -20,20 +20,38 @@ from dash import Dash, html, dcc
     
     # fig.show()
 
-from economic_impact import *
+# from economic_impact import *
 
-df = clean_disaster_summaries()
-df_t = df.groupby(["state_code", "year"], as_index=False)["federalObligatedAmount"].sum()
+# df = clean_disaster_summaries()
+# df_t = df.groupby(["state_code", "year"], as_index=False)["federalObligatedAmount"].sum()
 
-col_names = df_t.columns.tolist()
-fig = px.choropleth(df_t, locations='state_code',
-                        locationmode="USA-states", color='federalObligatedAmount', scope="usa",
+# col_names = df_t.columns.tolist()
+# fig = px.choropleth(df_t, locations='state_code',
+#                         locationmode="USA-states", color='federalObligatedAmount', scope="usa",
+#                         color_continuous_scale=px.colors.sequential.OrRd,
+#                         hover_name = ('state_code'),
+#                         animation_frame = 'year'
+# )
+
+# fig.show()
+
+
+from climate_datasets import *
+
+df = get_cleaned_data("disaster_declarations.csv")
+data = number_of_disaster_events_by_state(df)
+
+grouped_data = data.groupby(["state", "year"], as_index=False)["total_number_of_events"].sum()
+
+fig = px.choropleth(grouped_data, locations='state',
+                        locationmode="USA-states", color='total_number_of_events', scope="usa",
                         color_continuous_scale=px.colors.sequential.OrRd,
-                        hover_name = ('state_code'),
-                        animation_frame = 'year'
+                        animation_frame = 'year',
+                        # range_color = (0, 60)
 )
 
 fig.show()
+
 
 # app = dash.Dash()
 
@@ -76,3 +94,7 @@ fig.show()
 # )
 
 # steps = []
+
+
+# Cleaning PA dataset - year, incident types, severe storms(s)
+# Merged dataset for dropdowns
