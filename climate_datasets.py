@@ -1,5 +1,5 @@
 import pandas as pd
-
+pd.options.mode.chained_assignment = None
 #importing dataset
 #"disaster_declarations.csv"
 
