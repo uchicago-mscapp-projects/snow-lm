@@ -4,10 +4,6 @@ import numpy as np
 #importing dataset
 #"disaster_declarations.csv"
 
-#get the state name added to the file- so that it can be used to hover. 
-# add the graphics in jupyter- make that clean
-# make the file for 
-
 def get_cleaned_data(raw_data_path):
     '''
     Takes in raw data filepath and outputs the clean climate related disasters
