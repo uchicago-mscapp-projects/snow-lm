@@ -3,6 +3,10 @@ import pandas as pd
 #importing dataset
 #"disaster_declarations.csv"
 
+#get the state name added to the file- so that it can be used to hover. 
+# add the graphics in jupyter- make that clean
+# make the file for 
+
 def get_cleaned_data(raw_data_path):
     '''
     Takes in raw data filepath and outputs the clean climate related disasters
@@ -36,7 +40,7 @@ def get_cleaned_data(raw_data_path):
     climate_disasters = disasters.loc[disasters['disaster_type']
                                       .isin(climate_disasters_list)]
 
-    #subsetting into last 23 years (2000-2023)
+    #subsetting into last 22 years (2000-2022), excluding 2023. 
     climate_disasters["dec_date"] = pd.to_datetime(climate_disasters["dec_date"])
     climate_disasters['year'] = climate_disasters['dec_date'].dt.strftime('%Y')
     climate_last_23 = climate_disasters.loc[(climate_disasters['year'] >= '2000')
@@ -124,9 +128,7 @@ def number_of_days_in_dec_disaster(climate_df):
     len(climate_state.end_date.value_counts())
 
     # remove all disasters that did not have either a begin date or end date
-    climate_state.shape[0]
     climate_state_no_na=climate_state.dropna(subset=['begin_date','end_date'])
-    climate_state_no_na.shape[0]
     # converting both end date and begin date to 
     climate_state_no_na['end_date']= pd.to_datetime(
         climate_state_no_na['end_date'])
