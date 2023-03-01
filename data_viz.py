@@ -9,6 +9,7 @@ import pandas as pd
 import numpy as np
 import json
 from dash import Dash, html, dcc
+from dash.dependencies import Input, Output
 
 # def create_state_map(): 
 
@@ -43,58 +44,11 @@ data = number_of_disaster_events_by_state(df)
 
 grouped_data = data.groupby(["state", "year"], as_index=False)["total_number_of_events"].sum()
 
-fig = px.choropleth(grouped_data, locations='state',
+fig1 = px.choropleth(grouped_data, locations='state',
                         locationmode="USA-states", color='total_number_of_events', scope="usa",
                         color_continuous_scale=px.colors.sequential.OrRd,
                         animation_frame = 'year',
                         # range_color = (0, 60)
 )
 
-fig.show()
-
-
-# app = dash.Dash()
-
-# app.layout = html.Div([
-#     dcc.Dropdown(['incidentType'])
-# ])
-
-# fig  = go.Figure()
-
-# fig.add_trace(px.choropleth(df_t, locations='state_code',
-#                         locationmode="USA-states", color='federalObligatedAmount', scope="usa",
-#                         color_continuous_scale=px.colors.sequential.OrRd,
-#                         hover_name = ('state_code')
-# ))
-
-# fig.update_layout(
-#     updatemenus=[
-#         dict(
-#             buttons=list([
-#                 dict(
-#                     args=["type", "surface"],
-#                     label="3D Surface",
-#                     method="restyle"
-#                 ),
-#                 dict(
-#                     args=["type", "heatmap"],
-#                     label="Heatmap",
-#                     method="restyle"
-#                 )
-#             ]),
-#             direction="down",
-#             pad={"r": 10, "t": 10},
-#             showactive=True,
-#             x=0.1,
-#             xanchor="left",
-#             y=1.1,
-#             yanchor="top"
-#         ),
-#     ]
-# )
-
-# steps = []
-
-
-# Cleaning PA dataset - year, incident types, severe storms(s)
-# Merged dataset for dropdowns
+fig1.show()
