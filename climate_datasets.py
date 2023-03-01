@@ -1,5 +1,6 @@
 import pandas as pd
 pd.options.mode.chained_assignment = None
+import numpy as np
 #importing dataset
 #"disaster_declarations.csv"
 
@@ -119,7 +120,8 @@ def number_of_disaster_events_by_state(climate_df):
                                                        keep = "first")
 
     #reordering the columns
-    climate_summary = climate_summary[['year','state','state_name','disaster_type']]
+    climate_summary = climate_summary[['year','state','state_name',
+                                       'disaster_type']]
 
     # getting the total number of events in each state by incident type- just 
     # the duplicate rows
@@ -140,12 +142,8 @@ def number_of_days_in_dec_disaster(climate_df):
     '''
     # removing unneccessary columns
     climate_state = climate_df.drop(columns=['state_code','county_code',
-                                               'dec_date','pa_program'])
+                                               'dec_date','pa_program','state'])
     
-    # checking len of begin_date and end_date
-    len(climate_state.begin_date.value_counts())
-    len(climate_state.end_date.value_counts())
-
     # remove all disasters that did not have either a begin date or end date
     climate_state_no_na=climate_state.dropna(subset=['begin_date','end_date'])
     # converting both end date and begin date to 
@@ -163,12 +161,20 @@ def number_of_days_in_dec_disaster(climate_df):
         subset ='disaster_number',keep = "first")
    
     climate_grouped_by_state = climate_state_no_na.groupby(
-        ['state', 'year'], as_index = False)['length_of_disaster'].mean()
+        ['state_name', 'year'], as_index = False)['length_of_disaster'].mean()
+    
     climate_grouped_by_state = climate_grouped_by_state.groupby(
-        ['state'], as_index = False)['length_of_disaster'].mean()
+        ['state_name'], as_index = False)['length_of_disaster'].mean()
+    
+    climate_grouped_by_state['length_of_disaster'] = np.round(
+        climate_grouped_by_state['length_of_disaster'], decimals = 1)
     
     # a dict with states as keys and values as the average length of the disaster
-    climate_dict= dict(zip(climate_grouped_by_state.state,
+    climate_dict= dict(zip(climate_grouped_by_state.state_name,
                             climate_grouped_by_state.length_of_disaster))
+    
+    # add the national average
+    national_average = climate_grouped_by_state["length_of_disaster"].mean()
+    climate_dict['National Average'] = np.round(national_average,decimals = 1)
 
     return climate_dict
