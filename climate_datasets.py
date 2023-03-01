@@ -51,7 +51,26 @@ def get_cleaned_data(raw_data_path):
     climate_last_23.drop(climate_last_23[climate_last_23['county_code'] == 0].index,
                           inplace = True)
     
-    return climate_last_23
+    # add state name
+    state_names = get_state_names("Census_State_codes.txt")
+    climate_data = climate_last_23.merge(state_names, how='left', 
+                                         on = ['state'])
+    
+    return climate_data
+
+# Census_State_codes.txt
+def get_state_names(raw_file_path):
+    '''
+    Inputs a raw file of state codes and outputs a pandas dataframe with
+    the 2 letter state codes and the state name.
+    '''
+    state_code_lookup_raw = pd.read_csv(raw_file_path,sep='|')
+    state_code_lookup_raw.drop(columns=['STATE',
+        'STATENS'], inplace=True)
+    state_names =  state_code_lookup_raw.rename(
+        columns={"STATE_NAME": "state_name", "STUSAB": "state"})
+    
+    return state_names
 
 def list_of_disaster_numbers(climate_df):
     '''
@@ -100,7 +119,7 @@ def number_of_disaster_events_by_state(climate_df):
                                                        keep = "first")
 
     #reordering the columns
-    climate_summary = climate_summary[['year','state','disaster_type']]
+    climate_summary = climate_summary[['year','state','state_name','disaster_type']]
 
     # getting the total number of events in each state by incident type- just 
     # the duplicate rows
