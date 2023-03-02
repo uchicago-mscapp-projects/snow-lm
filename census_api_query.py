@@ -94,21 +94,29 @@ def api_query():
 
     column_names_county = ["name", "total_households", "percent_unemployed", "median_household_income",
         "without_healthcare_coverage", "bach_or_higher", "percent_white", "percent_blackORaa", 
-        "percent_ai_and_an", "percent_asian", "percent_nh_and_pi", "percent_race_other", "percent_race_two_more", "state", "county"]
+        "percent_ai_and_an", "percent_asian", "percent_nh_and_pi", "percent_race_other", "percent_race_two_more", "state_code", "county_code"]
 
-    column_names_state = ["name", "total_households", "percent_unemployed", "median_household_income",
-        "without_healthcare_coverage", "bach_or_higher", "percent_white", "percent_blackORaa", 
-        "percent_ai_and_an", "percent_asian", "percent_nh_and_pi", "percent_race_other", "percent_race_two_more", "state"]
+    column_names_state = ["name", "total_households_state", "percent_unemployed_state", "median_household_income_state",
+        "without_healthcare_coverage_state", "bach_or_higher_state", "state_code"]
 
-    column_names_us = ["name", "total_households", "percent_unemployed", "median_household_income",
-        "without_healthcare_coverage", "bach_or_higher", "percent_white", "percent_blackORaa", 
-        "percent_ai_and_an", "percent_asian", "percent_nh_and_pi", "percent_race_other", "percent_race_two_more", "country"]
+    column_names_us = ["name", "total_households_us", "percent_unemployed_us", "median_household_income_us",
+        "without_healthcare_coverage_us", "bach_or_higher_us", "country_code"]
+
     census_df_county = pd.DataFrame(columns = column_names_county, data = census_json_county[1:])
     census_df_state = pd.DataFrame(columns = column_names_state, data = census_json_state[1:])
     census_df_us = pd.DataFrame(columns = column_names_us, data = census_json_us[1:])
-    #print(census_df)
+    print("census_df_county: ", census_df_county.head)
+    print("census_df_state: ", census_df_state.head)
+    print("census_df_us: ", census_df_us.head)
 
-    #Checking variable types and making any revisions necessary:
+    result1 = census_df_county.dtypes
+    result2 = census_df_state.dtypes
+    result3 = census_df_us.dtypes
+    print(result1)
+    print(result2)
+    print(result3)
+
+    #Checking variable types and making any revisions necessary to census_df_county:
     census_df_county["total_households"] = census_df_county["total_households"].astype(float)
     census_df_county["percent_unemployed"] = census_df_county["percent_unemployed"].astype(float)
     census_df_county["median_household_income"] = census_df_county["median_household_income"].astype(float)
@@ -122,20 +130,39 @@ def api_query():
     census_df_county["percent_race_other"] = census_df_county["percent_race_other"].astype(float)
     census_df_county["percent_race_two_more"] = census_df_county["percent_race_two_more"].astype(float)
 
+    #Add a variable to census_df_county that is a concatenation of the state code and the county code
+    census_df_county["state_and_county_code"] = census_df_county["state_code"] + census_df_county["county_code"]
+
+    #Checking variable types and making any revisions necessary to census_df_state:
+    census_df_state["total_households_state"] = census_df_state["total_households_state"].astype(float)
+    census_df_state["percent_unemployed_state"] = census_df_state["percent_unemployed_state"].astype(float)
+    census_df_state["median_household_income_state"] = census_df_state["median_household_income_state"].astype(float)
+    census_df_state["without_healthcare_coverage_state"] = census_df_state["without_healthcare_coverage_state"].astype(float)
+    census_df_state["bach_or_higher_state"] = census_df_state["bach_or_higher_state"].astype(float)
+
+    #Checking variable types and making any revisions necessary to census_df_us:
+    census_df_us["total_households_us"] = census_df_us["total_households_us"].astype(float)
+    census_df_us["percent_unemployed_us"] = census_df_us["percent_unemployed_us"].astype(float)
+    census_df_us["median_household_income_us"] = census_df_us["median_household_income_us"].astype(float)
+    census_df_us["without_healthcare_coverage_us"] = census_df_us["without_healthcare_coverage_us"].astype(float)
+    census_df_us["bach_or_higher_us"] = census_df_us["bach_or_higher_us"].astype(float)
+
     #Citation for loading in data and changing its types: https://www.youtube.com/watch?v=l47HptzM7ao
 
-    #Add a variable that is a concatenation of the state code and the county code
-    census_df_county["state_and_county_code"] = census_df_county["state"] + census_df_county["county"]
-
-
     #print(census_df_county)
-    result = census_df_county.dtypes
+    result1 = census_df_county.dtypes
+    result2 = census_df_state.dtypes
+    result3 = census_df_us.dtypes
+    print(result1)
+    print(result2)
+    print(result3)
     #print(result) #--> note: every variable was initially an "object" data type
 
-    #combine census_df_county, census_df_state, and census_df_country in full_census_df
+    #combine census_df_county, census_df_state, and census_df_us into full_census_df
+    
 
     #Return census dataframe
-    #return full_census_df
+    return census_df_county, census_df_state, census_df_us
 
     #Save df to CSV:
     #census_df_county.to_csv("census_demographic_data.csv", index = False)
