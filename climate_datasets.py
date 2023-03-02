@@ -4,10 +4,24 @@ import numpy as np
 #importing dataset
 #"disaster_declarations.csv"
 
-def get_cleaned_data(raw_data_path):
+#which states face the highest number of disasters declared? - top 5 states with most disasters declared
+    # which states face the most number of days in declared disaster
+    # how has the average days in disaster mode changes over time across the country
+    #print(climate_grouped_by_state['length_of_disaster'].value_counts())
+
+    # have the text one- the 42.63% of disasters happened in the last 10 years. 
+    # have bar chart that highlights it
+    # move down to map
+    # have the by days- over the last 20 years below. 
+
+def get_cleaned_data(raw_data_path, only_2000_onwards = True):
     '''
-    Takes in raw data filepath and outputs the clean climate related disasters
-    over the last 23 years. 
+    Takes in raw data filepath and a boolean to choose only last 20 years of 
+        data or data since 1980 and outputs the clean climate related disasters
+        over the last 23 years or between 1980-2000. 
+        For counties: Only take last 23 years
+        For days in disaster: Take data from last 23 years. 
+        For rest: Take data from 1980. 
     '''
 
     disasters_raw = pd.read_csv(raw_data_path)
@@ -37,20 +51,29 @@ def get_cleaned_data(raw_data_path):
     climate_disasters = disasters.loc[disasters['disaster_type']
                                       .isin(climate_disasters_list)]
 
-    #subsetting into last 22 years (2000-2022), excluding 2023. 
+    
     climate_disasters["dec_date"] = pd.to_datetime(climate_disasters["dec_date"])
     climate_disasters['year'] = climate_disasters['dec_date'].dt.strftime('%Y')
-    climate_last_23 = climate_disasters.loc[(climate_disasters['year'] >= '2000')
+
+    if only_2000_onwards:
+        #subsetting into last 22 years (2000-2022), excluding 2023. 
+        climate_cleaned = climate_disasters.loc[(
+            climate_disasters['year'] >= '2000')
                      & (climate_disasters['year'] < '2023')]
+    else:
+        # take from 1980-2022
+        climate_cleaned = climate_disasters.loc[(
+            climate_disasters['year'] >= '1980') & (
+            climate_disasters['year'] < '2023')]
     
     #remove records that have 0's in the county code- they are ones that are 
     # state-wide disasters and are already covered by other rows. 
-    climate_last_23.drop(climate_last_23[climate_last_23['county_code'] == 0].index,
+    climate_cleaned.drop(climate_cleaned[climate_cleaned['county_code'] == 0].index,
                           inplace = True)
     
     # add state name
     state_names = get_state_names("Census_State_codes.txt")
-    climate_data = climate_last_23.merge(state_names, how='left', 
+    climate_data = climate_cleaned.merge(state_names, how='left', 
                                          on = ['state'])
     
     return climate_data
@@ -112,6 +135,7 @@ def number_of_disaster_events_by_state(climate_df):
 
     #only keep one county row per disaster- since we just need to find the total
     # number of events
+    #print(climate_summary)
     climate_summary = climate_summary.drop_duplicates(subset ='disaster_number',
                                                        keep = "first")
 
@@ -123,12 +147,39 @@ def number_of_disaster_events_by_state(climate_df):
     # the duplicate rows
     climate_summary = climate_summary.groupby(climate_summary.columns.tolist(),
                                               as_index=False).size()
-
     #renaming the size column. 
     climate_summary.rename(columns = {"size": "total_number_of_events"}, 
                            inplace = True)
-    
+    #print(climate_summary)
     return climate_summary
+
+def change_in_frequency(climate_summary):
+    '''
+    Takes a pandas dataframe and returns the sum of all disasters taking place
+    each year in every state to compare across time.
+    '''
+    #print(climate_summary.head())
+    climate_by_state = climate_summary.groupby(
+        ['state_name','disaster_type','year'], as_index = False)['total_number_of_events'].sum()
+
+    climate_by_state = climate_by_state.groupby(
+        ['year'], as_index = False)['total_number_of_events'].sum()
+
+    return climate_by_state
+
+def number_of_disasters_over_last_decade(climate_summary):
+    '''
+    Takes a pandas df and returns the % of disasters that have taken place since
+    2010.
+    '''
+    climate_last_dec = climate_summary.loc[(climate_summary['year'] >= '2010')
+                     & (climate_summary['year'] <= '2022')]
+    num_of_disasters_total = climate_summary['total_number_of_events'].sum()
+    num_of_disasters_since2010 = climate_last_dec['total_number_of_events'].sum()
+    
+    no_of_disasters = num_of_disasters_since2010/num_of_disasters_total * 100
+
+    return np.round(no_of_disasters,decimals = 2)
 
 def number_of_days_in_dec_disaster(climate_df):
     '''

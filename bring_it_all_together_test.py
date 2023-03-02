@@ -15,11 +15,13 @@ def get_climate_econ_data():
         columns = {"incidentType": "disaster_type"}, inplace = True)
 
     disaster_events_by_state = number_of_disaster_events_by_state(
-    get_cleaned_data("disaster_declarations.csv"))
+    get_cleaned_data("disaster_declarations.csv", False))
     
     screen_1_data = disaster_events_by_state.merge(
         FEMA_obli_by_yr_state_disastertype, how='left', 
         on = ['state', 'year','disaster_type'])
+    
+    screen_1_data = screen_1_data.sort_values(by='year', ascending=True)
     
     return screen_1_data
 
