@@ -139,6 +139,7 @@ def api_query():
     census_df_state["median_household_income_state"] = census_df_state["median_household_income_state"].astype(float)
     census_df_state["without_healthcare_coverage_state"] = census_df_state["without_healthcare_coverage_state"].astype(float)
     census_df_state["bach_or_higher_state"] = census_df_state["bach_or_higher_state"].astype(float)
+    census_df_state["country_code"] = 1
 
     #Checking variable types and making any revisions necessary to census_df_us:
     census_df_us["total_households_us"] = census_df_us["total_households_us"].astype(float)
@@ -146,6 +147,7 @@ def api_query():
     census_df_us["median_household_income_us"] = census_df_us["median_household_income_us"].astype(float)
     census_df_us["without_healthcare_coverage_us"] = census_df_us["without_healthcare_coverage_us"].astype(float)
     census_df_us["bach_or_higher_us"] = census_df_us["bach_or_higher_us"].astype(float)
+    census_df_us["country_code"] = census_df_us["country_code"].astype(int)
 
     #Citation for loading in data and changing its types: https://www.youtube.com/watch?v=l47HptzM7ao
 
@@ -159,7 +161,11 @@ def api_query():
     #print(result) #--> note: every variable was initially an "object" data type
 
     #combine census_df_county, census_df_state, and census_df_us into full_census_df
-    
+    census_df_stateANDus = census_df_state.merge(census_df_us, how = "outer", on = "country_code")
+    full_census_df = census_df_county.merge(census_df_stateANDus, how = "outer", on = "state_code")
+
+    #pd.set_option('display.max_columns', None)
+    #full_census_df.head
 
     #Return census dataframe
     return census_df_county, census_df_state, census_df_us
