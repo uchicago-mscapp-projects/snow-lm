@@ -168,7 +168,8 @@ def api_query():
     #full_census_df.head
 
     #Return census dataframe
-    return census_df_county, census_df_state, census_df_us
+    #return census_df_county, census_df_state, census_df_us
+    return full_census_df
 
     #Save df to CSV:
     #census_df_county.to_csv("census_demographic_data.csv", index = False)
