@@ -1,5 +1,5 @@
 from economic_impact import clean_disaster_summaries
-import voting_record
+from voting_record import scrape_voting_behavior
 from climate_datasets import *
 
 def get_climate_econ_data():
@@ -25,3 +25,5 @@ def get_climate_econ_data():
     
     return screen_1_data
 
+def get_voting_data():
+    return scrape_voting_behavior() 
