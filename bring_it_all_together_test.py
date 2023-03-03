@@ -1,5 +1,5 @@
 from economic_impact import clean_disaster_summaries
-import voting_record
+from voting_record import scrape_voting_behavior
 from climate_datasets import *
 
 def get_climate_econ_data(only_2000_onwards):
@@ -59,3 +59,6 @@ def get_climate_econ_pop_data():
         screen_1_data.at[index,'state_pop'] = pop_of_state_for_that_year
     
     return screen_1_data
+
+def get_voting_data():
+    return scrape_voting_behavior() 
