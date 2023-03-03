@@ -4,17 +4,7 @@ import numpy as np
 #importing dataset
 #"disaster_declarations.csv"
 
-#which states face the highest number of disasters declared? - top 5 states with most disasters declared
-    # which states face the most number of days in declared disaster
-    # how has the average days in disaster mode changes over time across the country
-    #print(climate_grouped_by_state['length_of_disaster'].value_counts())
-
-    # have the text one- the 42.63% of disasters happened in the last 10 years. 
-    # have bar chart that highlights it
-    # move down to map
-    # have the by days- over the last 20 years below. 
-
-def get_cleaned_data(raw_data_path, only_2000_onwards = True):
+def get_cleaned_data(raw_data_path, only_2000_onwards):
     '''
     Takes in raw data filepath and a boolean to choose only last 20 years of 
         data or data since 1980 and outputs the clean climate related disasters
@@ -135,7 +125,6 @@ def number_of_disaster_events_by_state(climate_df):
 
     #only keep one county row per disaster- since we just need to find the total
     # number of events
-    #print(climate_summary)
     climate_summary = climate_summary.drop_duplicates(subset ='disaster_number',
                                                        keep = "first")
 
@@ -153,17 +142,27 @@ def number_of_disaster_events_by_state(climate_df):
     #print(climate_summary)
     return climate_summary
 
+def num_of_disasters(climate_summary):
+    '''
+    get the major disasters that take place in each state
+    '''
+    climate_grouped_by_disasters =  climate_summary.groupby(
+        ['state_name', 'disaster_type'], as_index = False)[
+        'total_number_of_events'].sum()
+    
+    return climate_grouped_by_disasters
+
 def change_in_frequency(climate_summary):
     '''
-    Takes a pandas dataframe and returns the sum of all disasters taking place
-    each year in every state to compare across time.
+    Takes a pandas dataframe and returns the sum of each disaster taking place
+    each year across the nation to compare across time.
     '''
-    #print(climate_summary.head())
     climate_by_state = climate_summary.groupby(
-        ['state_name','disaster_type','year'], as_index = False)['total_number_of_events'].sum()
+        ['state_name','disaster_type','year'], as_index = False)[
+        'total_number_of_events'].sum()
 
     climate_by_state = climate_by_state.groupby(
-        ['year'], as_index = False)['total_number_of_events'].sum()
+        ['disaster_type','year'], as_index = False)['total_number_of_events'].sum()
 
     return climate_by_state
 
@@ -225,3 +224,58 @@ def number_of_days_in_dec_disaster(climate_df):
     climate_dict['National Average'] = np.round(national_average,decimals = 1)
 
     return climate_dict
+
+def get_pop_across_years(raw_file,period_start, period_end):
+    '''
+    Inputs state level population numbers from either 2000-2009, 2010-2019 or
+    2020-2022, a period_start and period_end year and outputs the population
+    of each state in that period. 
+    '''
+    pop_period = pd.read_csv(raw_file)
+    
+    # dropping all NA values
+    pop_period.dropna(axis=0,inplace= True)
+
+    # getting the right columns needed for the period
+    name_list = ['state_name'] + list(range(period_start,period_end +1))
+    name_list = [str(i) for i in name_list]
+
+    # file specific cleaning requirements based on exploration
+    if period_start == 2000:
+        pop_period.drop(columns=pop_period.columns[-2:], axis=1, inplace=True)
+        pop_period.drop(columns=pop_period.columns[1], axis=1, inplace=True)
+    elif period_start == 2010:
+        pop_period.drop(columns=pop_period.columns[1:3], axis=1, inplace=True)
+    elif period_start == 2020:
+        pop_period.drop(columns=pop_period.columns[1], axis=1, inplace=True)
+    else:
+        raise Exception ("Out of bound time period")
+    
+    #renaming all columns for the period
+    pop_period.columns = name_list
+    
+    #data cleaning
+    pop_period['state_name'] = pop_period["state_name"].str.replace(".","",
+                                                                     regex= True)
+
+    # get the state names and matching
+    state_names = get_state_names('Census_State_codes.txt')
+    state_name_list = state_names.state_name.values.tolist()
+    pop_period = pop_period.loc[pop_period['state_name']
+                                      .isin(state_name_list)]
+    
+    return pop_period
+
+def get_all_pop():
+    '''
+    gets all state population numbers from 2000-2022. 
+    '''
+    pop_2000_2009 = get_pop_across_years("state_pop_2000_2009.csv", 2000,2009)
+    pop_2010_2019 = get_pop_across_years("state_pop_2010_2019.csv", 2010,2019)
+    pop_2020_2022 = get_pop_across_years("state_pop_2020_2022.csv", 2020,2022)
+
+    #merging all periods together
+    all_pop= pop_2000_2009.merge(pop_2010_2019, how='left', on='state_name')
+    all_pop = all_pop.merge(pop_2020_2022, how='left', on='state_name')
+    
+    return all_pop
