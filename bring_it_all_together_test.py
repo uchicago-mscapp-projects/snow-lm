@@ -61,4 +61,4 @@ def get_climate_econ_pop_data():
     return screen_1_data
 
 def get_voting_data():
-    return scrape_voting_behavior() 
+    return scrape_voting_behavior()
