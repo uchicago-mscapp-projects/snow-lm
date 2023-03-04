@@ -8,7 +8,7 @@ Code for analyzing the climate datasets from FEMA.
 import pandas as pd
 pd.options.mode.chained_assignment = None
 import numpy as np
-from snowlm.econ_political_analysis.economic_impact import (
+from snowlm.data_analysis.economic_impact import (
     clean_disaster_summaries)
 
 def get_cleaned_data(raw_data_path, only_2000_onwards):
