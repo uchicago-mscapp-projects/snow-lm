@@ -1,8 +1,6 @@
 import pandas as pd
 pd.options.mode.chained_assignment = None
 import numpy as np
-#importing dataset
-#"disaster_declarations.csv"
 
 def get_cleaned_data(raw_data_path, only_2000_onwards):
     '''
@@ -64,13 +62,12 @@ def get_cleaned_data(raw_data_path, only_2000_onwards):
         climate_cleaned['county_code'] == 0].index,inplace = True)
     
     # add state name for readability
-    state_names = get_state_names("Census_State_codes.txt")
-    climate_data = climate_cleaned.merge(state_names, how='left', 
-                                         on = ['state'])
+    state_names = get_state_names("snowlm/data/Census_State_codes.txt")
+    climate_data = climate_cleaned.merge(state_names, how='left', on = ['state'])
     
     return climate_data
 
-# Census_State_codes.txt
+# snowlm/data/Census_State_codes.txt
 def get_state_names(raw_file_path):
     '''
     Inputs a raw file of state codes and outputs a pandas dataframe with
@@ -241,7 +238,7 @@ def number_of_days_in_dec_disaster(climate_df):
                                                'dec_date','pa_program','state'])
     
     # remove all disasters that did not have either a begin date or end date
-    climate_state_no_na=climate_state.dropna(subset=['begin_date','end_date'])
+    climate_state_no_na = climate_state.dropna(subset=['begin_date','end_date'])
     
     # converting both end date and begin date to datetime
     climate_state_no_na['end_date']= pd.to_datetime(
@@ -315,7 +312,7 @@ def get_pop_across_years(raw_data_path,period_start,period_end):
                                           ].str.replace(".","",regex= True)
 
     # get the state names and matching
-    state_names = get_state_names('Census_State_codes.txt')
+    state_names = get_state_names("snowlm/data/Census_State_codes.txt")
     state_name_list = state_names.state_name.values.tolist()
     pop_period = pop_period.loc[pop_period['state_name']
                                       .isin(state_name_list)]
@@ -332,9 +329,12 @@ def get_all_pop():
         all_pop: A pandas dataframe that gets population data from the period
             of 2000-2022. 
     '''
-    pop_2000_2009 = get_pop_across_years("state_pop_2000_2009.csv",2000,2009)
-    pop_2010_2019 = get_pop_across_years("state_pop_2010_2019.csv",2010,2019)
-    pop_2020_2022 = get_pop_across_years("state_pop_2020_2022.csv",2020,2022)
+    pop_2000_2009 = get_pop_across_years("snowlm/data/state_pop_2000_2009.csv",
+                                         2000,2009)
+    pop_2010_2019 = get_pop_across_years("snowlm/data/state_pop_2010_2019.csv",
+                                         2010,2019)
+    pop_2020_2022 = get_pop_across_years("snowlm/data/state_pop_2020_2022.csv",
+                                         2020,2022)
 
     #merging all periods together
     all_pop= pop_2000_2009.merge(pop_2010_2019, how='left', on='state_name')

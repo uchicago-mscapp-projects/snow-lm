@@ -1,6 +1,6 @@
-from economic_impact import clean_disaster_summaries
-from voting_record import scrape_voting_behavior
-from climate_datasets import *
+from econ_political_analysis.economic_impact import clean_disaster_summaries
+from econ_political_analysis.voting_record import scrape_voting_behavior
+from climate_analysis.climate_datasets import *
 
 def get_climate_econ_data(only_2000_onwards):
     '''
@@ -18,14 +18,15 @@ def get_climate_econ_data(only_2000_onwards):
             data.
     '''
     FEMA_obli_by_yr_state_disastertype = clean_disaster_summaries(
-    "PublicAssistanceFundedProjectsSummaries.csv", "disaster_declarations.csv")
+    "PublicAssistanceFundedProjectsSummaries.csv", 
+    "snowlm/data/disaster_declarations.csv")
 
     if only_2000_onwards:
         disaster_events_by_state = number_of_disaster_events_by_state(
-            get_cleaned_data("disaster_declarations.csv", True))
+            get_cleaned_data("snowlm/data/disaster_declarations.csv", True))
     else:
         disaster_events_by_state = number_of_disaster_events_by_state(
-            get_cleaned_data("disaster_declarations.csv", False))
+            get_cleaned_data("snowlm/data/disaster_declarations.csv", False))
     
     climate_econ_data = disaster_events_by_state.merge(
         FEMA_obli_by_yr_state_disastertype, how='left', 
@@ -54,8 +55,8 @@ def get_climate_econ_pop_data():
     for index, row in climate_econ_pop.iterrows():
         state_name = str(row['state_name'])
         year = str(row['year'])
-        pop_of_state_over_years = all_population.loc[all_population['state_name']
-                                                      == state_name]
+        pop_of_state_over_years = all_population.loc[
+            all_population['state_name'] == state_name]
         pop_of_state_for_that_year = 0
 
         if not pop_of_state_over_years.empty:
