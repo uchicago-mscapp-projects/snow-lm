@@ -2,7 +2,7 @@
 CAPP 30122
 Team: Snow Laughing Matter
 Primary Author: Harsh Vardhan Pachisia
-Code for analysis the climate datasets from FEMA. 
+Code for analyzing the climate datasets from FEMA. 
 '''
 
 import pandas as pd
@@ -152,7 +152,7 @@ def number_of_disaster_events_by_state(climate_df):
                                                  'begin_date', 'end_date'])
 
     #only keep one county row per disaster- since we just need to find the total
-    # number of events
+    #number of events
     climate_summary = climate_summary.drop_duplicates(subset ='disaster_number',
                                                        keep = "first")
     climate_summary = climate_summary[['year','state','state_name',

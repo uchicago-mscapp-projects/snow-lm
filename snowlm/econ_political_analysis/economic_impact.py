@@ -1,5 +1,5 @@
 import pandas as pd
-from snowlm.climate_analysis.climate_datasets import (get_cleaned_data,
+from snowlm.climate_analysis.climate import (get_cleaned_data,
                                                        list_of_disaster_numbers)
 
 def clean_disaster_summaries(filepath_public_assistance, filepath_disasters):
