@@ -124,14 +124,14 @@ def sep_jsons_to_merged_cleaned_dataframes(census_json_county, census_json_state
     '''
 
     #Create lists for each dataset's variable names:
-    column_names_county = ["name", "total_households", "percent_unemployed", "median_household_income",
+    column_names_county = ["name_county", "total_households", "percent_unemployed", "median_household_income",
         "without_healthcare_coverage", "bach_or_higher", "percent_white", "percent_blackORaa", 
         "percent_ai_and_an", "percent_asian", "percent_nh_and_pi", "percent_race_other", "percent_race_two_more", "state_code", "county_code"]
 
-    column_names_state = ["name", "total_households_state", "percent_unemployed_state", "median_household_income_state",
+    column_names_state = ["name_state", "total_households_state", "percent_unemployed_state", "median_household_income_state",
         "without_healthcare_coverage_state", "bach_or_higher_state", "state_code"]
 
-    column_names_us = ["name", "total_households_us", "percent_unemployed_us", "median_household_income_us",
+    column_names_us = ["name_country", "total_households_us", "percent_unemployed_us", "median_household_income_us",
         "without_healthcare_coverage_us", "bach_or_higher_us", "country_code"]
 
     #Save each file as a dataframe:
