@@ -1,3 +1,10 @@
+'''
+CAPP 30122
+Team: Snow Laughing Matter
+Primary Author: Harsh Vardhan Pachisia
+Code for analysis the climate datasets from FEMA. 
+'''
+
 import pandas as pd
 pd.options.mode.chained_assignment = None
 import numpy as np

@@ -1,3 +1,9 @@
+'''
+CAPP 30122
+Team: Snow Laughing Matter
+Primary Author: Harsh Vardhan Pachisia
+Code for bringing different py files together. 
+'''
 from econ_political_analysis.economic_impact import clean_disaster_summaries
 from econ_political_analysis.voting_record import scrape_voting_behavior
 from climate_analysis.climate_datasets import *
