@@ -1,1 +1,24 @@
-[![Open in Visual Studio Code](https://classroom.github.com/assets/open-in-vscode-c66648af7eb3fe8bc4f294546bfd86ef473780cde1dea487d3c4ff354943c9ae.svg)](https://classroom.github.com/online_ide?assignment_repo_id=9904588&assignment_repo_type=AssignmentRepo)
+# Project Snow-Laughing-Matter
+
+Final Project for CAPP122
+
+### Team
+
+Jackie Glasheen: jglasheen
+
+Harsh Vardhan Pachisia: harshpachisia
+
+Shwetha Srinivasan: shwetha
+
+Jennifer Yeaton: jkyeaton
+
+### Description
+- Why this problem matters. What did we do about it? 
+-  Major insights. 
+- How can this be helpful? 
+
+### Runing the project
+- Add steps that the person needes to follow to run the entire project.
+
+### Example Insights (Add charts and screenshots of graphics). 
+- 
