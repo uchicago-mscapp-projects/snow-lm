@@ -5,14 +5,19 @@ Final Project for CAPP122
 ### Team
 
 Jackie Glasheen: jglasheen
+
 Harsh Vardhan Pachisia: harshpachisia
+
 Shwetha Srinivasan: shwetha
+
 Jennifer Yeaton: jkyeaton
 
 ### Description
-- Describe the project and what we tried to do
+- Why this problem matters. What did we do about it? 
+-  Major insights. 
+- How can this be helpful? 
 
-### To run the project
+### Runing the project
 - Add steps that the person needes to follow to run the entire project.
 
 ### Example Insights (Add charts and screenshots of graphics). 
