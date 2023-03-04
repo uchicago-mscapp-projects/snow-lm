@@ -17,7 +17,7 @@ def clean_disaster_summaries(filepath_public_assistance, filepath_disasters):
     project_summaries = pd.read_csv(filepath_public_assistance)
 
     # Limit dataset to the subsetted disasters (see assumptions in climate_datasets.py)
-    disaster_list = list_of_disaster_numbers(get_cleaned_data(filepath_disasters))
+    disaster_list = list_of_disaster_numbers(get_cleaned_data(filepath_disasters, True))
     project_summaries = project_summaries[project_summaries.isin({"disasterNumber":
         disaster_list}).any(axis=1)]
 
@@ -38,5 +38,12 @@ def clean_disaster_summaries(filepath_public_assistance, filepath_disasters):
     # Aggregate federal oblications by state year, and disaster type
     collapsed_summaries = project_summaries.groupby(['state_code',
         'incidentType', "year"], as_index=False).sum('federalObligatedAmount')
+
+    collapsed_summaries.rename(columns = {"state_code": "state"}, 
+                           inplace = True)
+    collapsed_summaries.rename(
+        columns = {"federalObligatedAmount": "fed_amount"}, inplace = True)
+    collapsed_summaries.rename(
+        columns = {"incidentType": "disaster_type"}, inplace = True)
 
     return collapsed_summaries
