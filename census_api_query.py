@@ -1,13 +1,14 @@
 '''
 CAPP 30122
 Team: Snow Laughing Matter
-Primary Author: Jennifer Yeaton
-Code for querying the U.S. Census' API
+Author: Jennifer Yeaton
+
+Code for querying the U.S. Census' API, cleaning U.S. Census data, and 
+    combining three queries into one usable dataset.
 
 https://www.census.gov/data/developers/data-sets/acs-5year.html
 '''
 
-import re
 import pathlib
 import pandas as pd
 import requests
@@ -18,9 +19,11 @@ def api_query():
     return a dataframe of cleaned and combined data.
 
     Inputs:
+        None.
     
     Returns
-    dataframe
+        full_census_df (pandas dataframe): Cleaned and merged US census data at 
+            the county, state, and country-level for use for visualizations.
     '''
     #Assemble components of this query by following these steps:
     #1. Start query with the host name:
@@ -72,15 +75,17 @@ def api_query():
     #7. Add census API key for this project:
     census_api_key = "&key=dbaf6b8c0aa053d4df5ae844bba98940952fc50b"
 
-    #Create f strings
+    #8. Create f strings
     query_url_county = f"{host_name}{data_year}{dataset_name_acronym}{get}{list_of_vars_county}{geo_county}{census_api_key}"
-    print("query_url_county: ", query_url_county)
     query_url_state = f"{host_name}{data_year}{dataset_name_acronym}{get}{list_of_vars_state}{geo_state}{census_api_key}"
-    print("query_url_state: ", query_url_state)
     query_url_us = f"{host_name}{data_year}{dataset_name_acronym}{get}{list_of_vars_us}{geo_us}{census_api_key}"
+    
+    #REMOVE THESE CHECKS
+    print("query_url_state: ", query_url_state)
+    print("query_url_county: ", query_url_county)
     print("query_url_us: ", query_url_us)
 
-    #Request data using the full query url:
+    #9. Request data using the full query url:
     response_county = requests.get(query_url_county)
     response_state = requests.get(query_url_state)
     response_us = requests.get(query_url_us)
@@ -92,6 +97,33 @@ def api_query():
     #print(census_json_state)
     #print(census_json_us)
 
+    #Create cleaned and merged pandas dataframe from the three above json files:
+    full_census_df = sep_jsons_to_merged_cleaned_dataframes(census_json_county, 
+        census_json_state, census_json_us)
+
+    #Return census dataframe
+    return full_census_df
+
+
+def sep_jsons_to_merged_cleaned_dataframes(census_json_county, census_json_state, census_json_us):
+    '''
+    Create a cleaned and merged pandas dataframe from the json files returned by 
+        quering to the U.S. Census' API.
+
+    Inputs:
+        census_json_county (JSON): JSON file returned by API query for county-level
+            U.S. Census data.
+        census_json_state (JSON): JSON file returned by API query for state-level
+            U.S. Census data.
+        census_json_us (JSON): JSON file returned by API query for U.S.-level
+            U.S. Census data.
+
+    Returns:
+        full_census_df (pandas dataframe): Full merged and cleaned dataframe with
+            the U.S. Census data we queried. 
+    '''
+
+    #Create lists for each dataset's variable names:
     column_names_county = ["name", "total_households", "percent_unemployed", "median_household_income",
         "without_healthcare_coverage", "bach_or_higher", "percent_white", "percent_blackORaa", 
         "percent_ai_and_an", "percent_asian", "percent_nh_and_pi", "percent_race_other", "percent_race_two_more", "state_code", "county_code"]
@@ -102,6 +134,7 @@ def api_query():
     column_names_us = ["name", "total_households_us", "percent_unemployed_us", "median_household_income_us",
         "without_healthcare_coverage_us", "bach_or_higher_us", "country_code"]
 
+    #Save each file as a dataframe:
     census_df_county = pd.DataFrame(columns = column_names_county, data = census_json_county[1:])
     census_df_state = pd.DataFrame(columns = column_names_state, data = census_json_state[1:])
     census_df_us = pd.DataFrame(columns = column_names_us, data = census_json_us[1:])
@@ -109,6 +142,7 @@ def api_query():
     print("census_df_state: ", census_df_state.head)
     print("census_df_us: ", census_df_us.head)
 
+    #REMOVE DIRECTLY BELOW - JUST FOR CHECKING
     result1 = census_df_county.dtypes
     result2 = census_df_state.dtypes
     result3 = census_df_us.dtypes
@@ -117,6 +151,48 @@ def api_query():
     print(result3)
 
     #Checking variable types and making any revisions necessary to census_df_county:
+    clean_census_df_county = clean_county_level_census_data(census_df_county)
+
+    #Checking variable types and making any revisions necessary to census_df_state:
+    clean_census_df_state = clean_state_level_census_data(census_df_state)
+
+    #Checking variable types and making any revisions necessary to census_df_us:
+    clean_census_df_county = clean_us_level_census_data(census_df_us)
+
+    #Citation for loading in data and changing its types: https://www.youtube.com/watch?v=l47HptzM7ao
+
+    #REMOVE THESE CHECKS LATER:
+    result1 = census_df_county.dtypes
+    result2 = census_df_state.dtypes
+    result3 = census_df_us.dtypes
+    print(result1)
+    print(result2)
+    print(result3)
+
+    #Combine census_df_county, census_df_state, and census_df_us into full_census_df
+    census_df_stateANDus = census_df_state.merge(census_df_us, how = "outer", on = "country_code")
+    full_census_df = census_df_county.merge(census_df_stateANDus, how = "outer", on = "state_code")
+
+    #REMOVE THESE CHECKS:
+    #pd.set_option('display.max_columns', None)
+    #full_census_df.head
+
+    #return census_df_county, census_df_state, census_df_us
+    return full_census_df
+
+
+def clean_county_level_census_data(census_df_county):
+    '''
+    Cleans county-level US Census data.
+
+    Input:
+        census_df_county (pandas dataframe): Raw data from api pull at county level
+    
+    Returns:
+        census_df_county (pandas dataframe): Clean county-level U.S. Census data.
+    '''
+
+    #Revise variable types:
     census_df_county["total_households"] = census_df_county["total_households"].astype(float)
     census_df_county["percent_unemployed"] = census_df_county["percent_unemployed"].astype(float)
     census_df_county["median_household_income"] = census_df_county["median_household_income"].astype(float)
@@ -130,10 +206,25 @@ def api_query():
     census_df_county["percent_race_other"] = census_df_county["percent_race_other"].astype(float)
     census_df_county["percent_race_two_more"] = census_df_county["percent_race_two_more"].astype(float)
 
-    #Add a variable to census_df_county that is a concatenation of the state code and the county code
+    #Add a variable to census_df_county that is a concatenation of the state code and the county code:
     census_df_county["state_and_county_code"] = census_df_county["state_code"] + census_df_county["county_code"]
 
-    #Checking variable types and making any revisions necessary to census_df_state:
+    return census_df_county
+
+
+
+def clean_state_level_census_data(census_df_state):
+    '''
+    Cleans state-level U.S. Census data.
+
+    Input:
+        census_df_state (pandas dataframe): Raw data from api pull at state level
+    
+    Returns:
+        census_df_state (pandas dataframe): Clean state-level U.S. Census data.
+    '''
+
+    #Revise variable types:
     census_df_state["total_households_state"] = census_df_state["total_households_state"].astype(float)
     census_df_state["percent_unemployed_state"] = census_df_state["percent_unemployed_state"].astype(float)
     census_df_state["median_household_income_state"] = census_df_state["median_household_income_state"].astype(float)
@@ -141,7 +232,22 @@ def api_query():
     census_df_state["bach_or_higher_state"] = census_df_state["bach_or_higher_state"].astype(float)
     census_df_state["country_code"] = 1
 
-    #Checking variable types and making any revisions necessary to census_df_us:
+    return census_df_state
+
+
+def clean_us_level_census_data(census_df_us):
+    '''
+    Cleans country-level US Census data.
+
+    Input:
+        census_df_us (pandas dataframe): Raw data from U.S. Census API pull at 
+            the country level.
+    
+    Returns:
+        census_df_us (pandas dataframe): Clean country-level U.S. Census data.
+    '''
+
+    #Revise variable types:
     census_df_us["total_households_us"] = census_df_us["total_households_us"].astype(float)
     census_df_us["percent_unemployed_us"] = census_df_us["percent_unemployed_us"].astype(float)
     census_df_us["median_household_income_us"] = census_df_us["median_household_income_us"].astype(float)
@@ -149,27 +255,19 @@ def api_query():
     census_df_us["bach_or_higher_us"] = census_df_us["bach_or_higher_us"].astype(float)
     census_df_us["country_code"] = census_df_us["country_code"].astype(int)
 
-    #Citation for loading in data and changing its types: https://www.youtube.com/watch?v=l47HptzM7ao
+    return census_df_us
 
-    #print(census_df_county)
-    result1 = census_df_county.dtypes
-    result2 = census_df_state.dtypes
-    result3 = census_df_us.dtypes
-    print(result1)
-    print(result2)
-    print(result3)
-    #print(result) #--> note: every variable was initially an "object" data type
 
-    #combine census_df_county, census_df_state, and census_df_us into full_census_df
-    census_df_stateANDus = census_df_state.merge(census_df_us, how = "outer", on = "country_code")
-    full_census_df = census_df_county.merge(census_df_stateANDus, how = "outer", on = "state_code")
+def clean_census_data_to_csv(full_census_df):
+    '''
+    Print cleaned and merged U.S. Census dataset to a csv.
 
-    #pd.set_option('display.max_columns', None)
-    #full_census_df.head
+    Input:
+        full_census_df (pandas dataframe): Cleaned and merged census dataset as
+            a pandas dataframe.
 
-    #Return census dataframe
-    #return census_df_county, census_df_state, census_df_us
-    return full_census_df
+    Returns:
+        None. Creates a csv file.
+    '''
 
-    #Save df to CSV:
-    #census_df_county.to_csv("census_demographic_data.csv", index = False)
+    full_census_df.to_csv("census_demographic_data.csv", index = False)
