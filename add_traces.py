@@ -5,11 +5,11 @@ import plotly.express as px
 import pandas as pd
 from dash import Dash, html, dcc
 from dash.dependencies import Input, Output
-# import dash_bootstrap_components as dbc
+import dash_bootstrap_components as dbc
 
 ########################################################
 
-df = get_climate_econ_data()
+df = get_climate_econ_data(only_2000_onwards=True)
 
 df1 = df.groupby(["state", "year"])["total_number_of_events"].sum().reset_index()
 df2 = df.groupby(["state", "year"])["fed_amount"].sum().reset_index()
