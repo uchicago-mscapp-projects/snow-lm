@@ -1,11 +1,14 @@
 import dash
+from dash import Dash, html, dcc
 import dash_bootstrap_components as dbc
-from dash import Dash, html, dcc, dash_table
-from dash_bootstrap_templates import load_figure_template
 from dash.dependencies import Input, Output
 import plotly.graph_objects as go
 import plotly.express as px
 import pandas as pd
+import numpy as np
+from dash import dash_table
+from dash_bootstrap_templates import load_figure_template
+
 
 # Importing cleaned datasets from other files
 from snowlm.data_analysis.climate import *
@@ -17,7 +20,7 @@ dbc_css = "https://cdn.jsdelivr.net/gh/AnnMarieW/dash-bootstrap-templates/dbc.mi
 app = dash.Dash(__name__, external_stylesheets=[dbc.themes.SPACELAB, dbc_css])
 # load_figure_template("spacelab")
 
-#### Screen 1 Figures
+########## Screen 1 Figures
 climate_df = get_cleaned_data ("disaster_declarations.csv", only_2000_onwards = False)
 climate_summary = number_of_disaster_events_by_state (climate_df)
 change_in_frequency(climate_summary)
