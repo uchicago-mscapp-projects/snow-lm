@@ -55,6 +55,7 @@ def aggregate_public_assistance(public_assistance_df_file):
 
 def top_5_by_public_assistance(public_assistance_df_file):   
     """
+    
     """
     project_summaries = public_assistance_df_file.drop(columns = ['numberOfProjects',
      'educationApplicant'])
