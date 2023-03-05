@@ -34,7 +34,7 @@ def api_query():
     data_year = "/2021"
 
     #3. Add the dataset name acronym:
-    #https://api.census.gov/data/2019/acs/acs5
+    #https://api.census.gov/data/2021/acs/acs5
     dataset_name_acronym = "/acs/acs5/profile"
 
     #4. Add ?get= to the query:
@@ -42,9 +42,9 @@ def api_query():
     get = "?get="
 
     #5. Add variables:
-    list_of_vars_county = "NAME,DP02_0001E,DP03_0009PE,DP03_0062E,DP03_0099PE,DP02_0067PE,DP05_0037PE,DP05_0038PE,DP05_0039PE,DP05_0044PE,DP05_0052PE,DP05_0057PE,DP05_0058PE"
-    list_of_vars_state = "NAME,DP02_0001E,DP03_0009PE,DP03_0062E,DP03_0099PE,DP02_0067PE"
-    list_of_vars_us = "NAME,DP02_0001E,DP03_0009PE,DP03_0062E,DP03_0099PE,DP02_0067PE"
+    list_of_vars_county = "NAME,DP02_0001E,DP03_0009PE,DP03_0062E,DP03_0099PE,DP02_0068PE,DP05_0037PE,DP05_0038PE,DP05_0039PE,DP05_0044PE,DP05_0052PE,DP05_0057PE,DP05_0058PE"
+    list_of_vars_state = "NAME,DP02_0001E,DP03_0009PE,DP03_0062E,DP03_0099PE,DP02_0068PE"
+    list_of_vars_us = "NAME,DP02_0001E,DP03_0009PE,DP03_0062E,DP03_0099PE,DP02_0068PE"
 
     '''
     See below for descriptions of each variable:
@@ -53,10 +53,10 @@ def api_query():
     #DP02_0001E = total households
 
     #DP03_0009PE = Percent Estimate!!EMPLOYMENT STATUS!!Civilian labor force!!Unemployment Rate
-    #DP03_0062E = Estimate!!INCOME AND BENEFITS (IN 2018 INFLATION-ADJUSTED DOLLARS)!!Total households!!Median household income (dollars)
+    #DP03_0062E = Estimate!!INCOME AND BENEFITS (IN 2021 INFLATION-ADJUSTED DOLLARS)!!Total households!!Median household income (dollars)
     #DP03_0099PE = Percent Estimate!!HEALTH INSURANCE COVERAGE!!Civilian noninstitutionalized population!!No health insurance coverage
 
-    #DP02_0067PE = Percent Estimate!!EDUCATIONAL ATTAINMENT!!Population 25 years and over!!Bachelor's degree or higher
+    #DP02_0068PE = Percent Estimate!!EDUCATIONAL ATTAINMENT!!Population 25 years and over!!Bachelor's degree or higher
 
     #DP05_0037PE = Percent Estimate!!RACE!!Total population!!One race!!White
     #DP05_0038PE = Percent Estimate!!RACE!!Total population!!One race!!Black or African American
@@ -65,6 +65,8 @@ def api_query():
     #DP05_0052PE = Percent Estimate!!RACE!!Total population!!One race!!Native Hawaiian and Other Pacific Islander	
     #DP05_0057PE = Percent Estimate!!RACE!!Total population!!One race!!Some other race
     #DP05_0058PE = 	Percent Estimate!!RACE!!Total population!!Two or more races
+
+    https://api.census.gov/data/2021/acs/acs5/profile/variables.html
     '''
 
     #6. Add geography for county, state, and country:
@@ -124,14 +126,14 @@ def sep_jsons_to_merged_cleaned_dataframes(census_json_county, census_json_state
     '''
 
     #Create lists for each dataset's variable names:
-    column_names_county = ["name", "total_households", "percent_unemployed", "median_household_income",
+    column_names_county = ["name_county", "total_households", "percent_unemployed", "median_household_income",
         "without_healthcare_coverage", "bach_or_higher", "percent_white", "percent_blackORaa", 
         "percent_ai_and_an", "percent_asian", "percent_nh_and_pi", "percent_race_other", "percent_race_two_more", "state_code", "county_code"]
 
-    column_names_state = ["name", "total_households_state", "percent_unemployed_state", "median_household_income_state",
+    column_names_state = ["name_state", "total_households_state", "percent_unemployed_state", "median_household_income_state",
         "without_healthcare_coverage_state", "bach_or_higher_state", "state_code"]
 
-    column_names_us = ["name", "total_households_us", "percent_unemployed_us", "median_household_income_us",
+    column_names_us = ["name_country", "total_households_us", "percent_unemployed_us", "median_household_income_us",
         "without_healthcare_coverage_us", "bach_or_higher_us", "country_code"]
 
     #Save each file as a dataframe:
