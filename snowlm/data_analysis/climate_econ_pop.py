@@ -10,7 +10,7 @@ import pandas as pd
 pd.options.mode.chained_assignment = None
 import numpy as np
 from snowlm.data_analysis.economic_impact import (
-    clean_disaster_summaries)
+    clean_disaster_summaries, aggregate_public_assistance)
 from snowlm.data_analysis.climate import *
 
 def get_climate_econ_data(only_2000_onwards):
@@ -28,9 +28,10 @@ def get_climate_econ_data(only_2000_onwards):
         climate_econ_data: A pandas dataframe that provided climate and economic
             data.
     '''
-    FEMA_obli_by_yr_state_disastertype = clean_disaster_summaries(
+    FEMA_obli_by_yr_state_disastertype = aggregate_public_assistance(
+        clean_disaster_summaries(
     "snowlm/data/PublicAssistanceFundedProjectsSummaries.csv", 
-    "snowlm/data/disaster_declarations.csv")
+    "snowlm/data/disaster_declarations.csv"))
 
     if only_2000_onwards:
         disaster_events_by_state = number_of_disaster_events_by_state(
