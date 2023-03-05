@@ -1,15 +1,13 @@
 '''
 CAPP 30122
 Team: Snow Laughing Matter
-Primary Author: Harsh Vardhan Pachisia
-Code for analyzing the climate datasets from FEMA. 
+Author: Harsh Vardhan Pachisia
+Code for cleaning and analyzing the climate datasets from FEMA and
+writing functions to obtain final datasets for each visual. 
 '''
-
 import pandas as pd
 pd.options.mode.chained_assignment = None
 import numpy as np
-from snowlm.data_analysis.economic_impact import (
-    clean_disaster_summaries)
 
 def get_cleaned_data(raw_data_path, only_2000_onwards):
     '''
@@ -76,11 +74,10 @@ def get_cleaned_data(raw_data_path, only_2000_onwards):
     
     return climate_data
 
-# snowlm/data/Census_State_codes.txt
 def get_state_names(raw_file_path):
     '''
-    Inputs a raw file of state codes and outputs a pandas dataframe with
-    the 2 letter state codes and the state name.
+    Inputs a raw file of state codes ("snowlm/data/Census_State_codes.txt")
+    and outputs a pandas dataframe with the 2 letter state codes and state name.
 
     Inputs:
         raw_data_path(string): File path to CSV File of state codes data.
@@ -174,14 +171,17 @@ def type_of_disasters_by_state(climate_summary):
         climate_summary (pandas dataframe): Number of disasters in each state.
     
     Returns:
-        climate_grouped_by_disasters (pandas dataframe): Sum of each disaster
-            type by each state. 
+        climate_top_5 (pandas dataframe): Sum of each disaster
+            type by each state, limited to the top 5.  
     '''
     climate_grouped_by_disasters =  climate_summary.groupby(
-        ['state_name', 'disaster_type'], as_index = False)[
+        ['state', 'disaster_type'], as_index = False)[
         'total_number_of_events'].sum()
+    climate_top_5 = climate_grouped_by_disasters.sort_values([
+        'state','total_number_of_events'], ascending = [
+        True, False]).groupby('state').head(5)
     
-    return climate_grouped_by_disasters
+    return climate_top_5
 
 def change_in_frequency(climate_summary):
     '''
@@ -202,9 +202,7 @@ def change_in_frequency(climate_summary):
     climate_by_state = climate_by_state.groupby(
         ['disaster_type','year'], as_index = False)[
         'total_number_of_events'].sum()
-
-    climate_by_state = climate_by_state.sort_values(by='year', ascending=True)
-
+    
     return climate_by_state
 
 def number_of_disasters_over_last_decade(climate_summary):
@@ -244,7 +242,8 @@ def number_of_days_in_dec_disaster(climate_df):
     '''
     # removing unneccessary columns
     climate_state = climate_df.drop(columns=['state_code','county_code',
-                                               'dec_date','pa_program','state'])
+                                               'dec_date','pa_program',
+                                               'state_name'])
     
     # remove all disasters that did not have either a begin date or end date
     climate_state_no_na = climate_state.dropna(subset=['begin_date','end_date'])
@@ -265,14 +264,14 @@ def number_of_days_in_dec_disaster(climate_df):
     
     # getting the number of days
     climate_grouped_by_state = climate_state_no_na.groupby(
-        ['state_name', 'year'], as_index = False)['length_of_disaster'].mean()
+        ['state', 'year'], as_index = False)['length_of_disaster'].mean()
     climate_grouped_by_state = climate_grouped_by_state.groupby(
-        ['state_name'], as_index = False)['length_of_disaster'].mean()
+        ['state'], as_index = False)['length_of_disaster'].mean()
     climate_grouped_by_state['length_of_disaster'] = np.round(
         climate_grouped_by_state['length_of_disaster'], decimals = 1)
     
     # a dict with states as keys and values as the average length of disaster
-    climate_dict= dict(zip(climate_grouped_by_state.state_name,
+    climate_dict= dict(zip(climate_grouped_by_state.state,
                             climate_grouped_by_state.length_of_disaster))
     
     # add the national average
@@ -319,7 +318,7 @@ def get_pop_across_years(raw_data_path,period_start,period_end):
     #data cleaning
     pop_period['state_name'] = pop_period["state_name"
                                           ].str.replace(".","",regex= True)
-
+    
     # get the state names and matching
     state_names = get_state_names("snowlm/data/Census_State_codes.txt")
     state_name_list = state_names.state_name.values.tolist()
@@ -350,66 +349,3 @@ def get_all_pop():
     all_pop = all_pop.merge(pop_2020_2022, how='left', on='state_name')
     
     return all_pop
-
-def get_climate_econ_data(only_2000_onwards):
-    '''
-    Asks whether the user wants only data from 2000 onwards or the entire time
-        period 1980-2022 and returns a dataframe with total number of disaster
-        events in each year by disaster type and the federal amount of money
-        given for the same.
-    
-    Inputs:
-        only_2000_onwards(Boolean): True/False for whether to choose data from 
-            2000-2022 or 1980-2022.
-    
-    Returns:
-        climate_econ_data: A pandas dataframe that provided climate and economic
-            data.
-    '''
-    FEMA_obli_by_yr_state_disastertype = clean_disaster_summaries(
-    "snowlm/data/PublicAssistanceFundedProjectsSummaries.csv", 
-    "snowlm/data/disaster_declarations.csv")
-
-    if only_2000_onwards:
-        disaster_events_by_state = number_of_disaster_events_by_state(
-            get_cleaned_data("snowlm/data/disaster_declarations.csv", True))
-    else:
-        disaster_events_by_state = number_of_disaster_events_by_state(
-            get_cleaned_data("snowlm/data/disaster_declarations.csv", False))
-    
-    climate_econ_data = disaster_events_by_state.merge(
-        FEMA_obli_by_yr_state_disastertype, how='left', 
-        on = ['state', 'year','disaster_type'])
-    
-    climate_econ_data = climate_econ_data.sort_values(by='year',ascending=True)
-
-    return climate_econ_data
-
-def get_climate_econ_pop_data():
-    '''
-    Adds the population of the state at the time of the disaster. Note: 
-        Population only available between 2000-2023.
-    
-    Inputs: None
-
-    Returns:
-        climate_econ_pop:A pandas dataframe that provided climate, economic and
-            population data. 
-    '''
-    climate_econ_pop = get_climate_econ_data(only_2000_onwards=True)
-
-    all_population = get_all_pop()
-    climate_econ_pop["state_pop"] = None
-
-    for index, row in climate_econ_pop.iterrows():
-        state_name = str(row['state_name'])
-        year = str(row['year'])
-        pop_of_state_over_years = all_population.loc[
-            all_population['state_name'] == state_name]
-        pop_of_state_for_that_year = 0
-
-        if not pop_of_state_over_years.empty:
-            pop_of_state_for_that_year= pop_of_state_over_years[year].iloc[0]
-        climate_econ_pop.at[index,'state_pop'] = pop_of_state_for_that_year
-    
-    return climate_econ_pop
