@@ -32,6 +32,6 @@ It will ask you to open the dash application in the browser to see the interacti
 
 ### Example Charts
 
-![Trends in Number of Disaters](https://drive.google.com/file/d/14DmBf-ecgK25l1VxlRsWcoEnNA5sD4WN/view?usp=sharing)
+![Trends in Number of Disaters](https://drive.google.com/file/d/1b5LcTK_xHHWHlqe9LvI3PgQm-4jkCMeo/view?usp=sharing)
 
 ![Disasters in states across years](https://drive.google.com/file/d/1b5LcTK_xHHWHlqe9LvI3PgQm-4jkCMeo/view?usp=sharing)
