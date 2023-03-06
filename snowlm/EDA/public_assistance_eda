@@ -14,4 +14,19 @@ pivoted.sum(axis='columns') #returns total by state
 print(pivoted)
 
 
+## code for checking merge with disastr IDS
+
+len(project_summaries['disasterNumber'].unique()) #1544
+len(set(disaster_list))  ##2758, harsh has a longer time frame, and many 
+    #disasters dont have public assistance
+len(project_summaries['disasterNumber'].unique()) #1374
+
+## Duplicate removal code 
+    # Drop duplicate observations
+    # Duplicate observations appear for "snow" vs "snowstorm" disaster types,
+    # and "storm vs storm (s) disaster types
+    project_summaries.drop_duplicates(subset = ['disasterNumber', 'declarationDate',
+        'county', 'applicantName', 'educationApplicant', 'numberOfProjects',
+        'fed_amount'], keep = 'first', inplace = True)
+
 ################################################################################
