@@ -8,8 +8,7 @@ import plotly.express as px
 import pandas as pd
 
 # Importing cleaned datasets from other files
-from snowlm.data_analysis.climate import (get_cleaned_data, 
-    number_of_disaster_events_by_state, type_of_disasters_by_state)
+from snowlm.data_analysis.climate import *
 from snowlm.data_analysis.economic_impact import *
 from snowlm.data_analysis.climate_econ_pop import *
 from snowlm.scrape_api.census_api_query import *
@@ -94,8 +93,8 @@ funding_table = dash_table.DataTable(
 
 @app.callback(
     Output('bar-chart', 'figure'),
-    Output('funding-table', 'data')
     Output('table', 'data'),
+    Output('funding-table', 'data'),
     Input('choropleth-map', 'clickData')
 )
 
@@ -128,16 +127,17 @@ def generate_graphs(clickData):
         top_5_assistance_table = top_5_assistance.to_dict('records')
 
         # Create visuals for county level information from each state
-        census_data = clean_census_data_to_csv(data)
-        df_census = pd.read_csv("census_demographic_data.csv")
+        df_census = api_query()
 
-        # click_data = df_census[df_census['name_state'] == state]
-    
+        click_data = df_census[df_census['state_code_alpha'] == state]
 
-        # fig5 = px.bar(data_frame=click_data, x= ['name_county', 'name_state', 'name_country'], 
-        #                 y=['percent_unemployed', 'percent_unemployed_state', 'percent_unemployed_country'])
 
-        return fig4, top_5_table, top_5_assistance_table
+        fig5 = px.bar(data_frame=click_data, x= ['name_county', 'name_state', 'name_country'], 
+                         y=['percent_unemployed', 'percent_unemployed_state', 'percent_unemployed_country'])
+
+        # fig5
+
+        return fig4, top_5_table, top_5_assistance_table, fig5
 
     else:
         return {}

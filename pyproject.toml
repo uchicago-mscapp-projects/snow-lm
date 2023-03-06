@@ -4,7 +4,7 @@ version = "0.1.0"
 description = ""
 authors = ["Harsh Vardhan Pachisia <harshpachisia@linux3.cs.uchicago.edu>"]
 readme = "README.md"
-packages = [{include = "30122_project_snow_lm"}]
+packages = [{include = "snowlm"}]
 
 [tool.poetry.dependencies]
 python = "^3.8"
