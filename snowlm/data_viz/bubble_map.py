@@ -1,4 +1,3 @@
-from  bring_it_all_together_test import *
 import dash
 import plotly.graph_objects as go
 import plotly.express as px
@@ -45,7 +44,7 @@ from snowlm.data_analysis.climate_econ_pop import *
 from snowlm.scrape_api.census_api_query import *
 
 
-climate_df = get_cleaned_data ("disaster_declarations.csv", only_2000_onwards = False)
+climate_df = get_cleaned_data ("snowlm/data/disaster_declarations.csv", only_2000_onwards = False)
 
 # states = number_of_days_in_dec_disaster(climate_df).keys()
 # values = number_of_days_in_dec_disaster(climate_df).values()

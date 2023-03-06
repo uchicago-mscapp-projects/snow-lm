@@ -8,7 +8,8 @@ import plotly.express as px
 import pandas as pd
 
 # Importing cleaned datasets from other files
-from snowlm.data_analysis.climate import *
+from snowlm.data_analysis.climate import (get_cleaned_data, 
+    number_of_disaster_events_by_state, type_of_disasters_by_state)
 from snowlm.data_analysis.economic_impact import *
 from snowlm.data_analysis.climate_econ_pop import *
 from snowlm.scrape_api.census_api_query import *
@@ -17,9 +18,9 @@ dbc_css = "https://cdn.jsdelivr.net/gh/AnnMarieW/dash-bootstrap-templates/dbc.mi
 app = dash.Dash(__name__, external_stylesheets=[dbc.themes.SPACELAB, dbc_css])
 # load_figure_template("spacelab")
 
-#### Screen 1 Figures
-climate_df = get_cleaned_data ("disaster_declarations.csv", only_2000_onwards = False)
-climate_summary = number_of_disaster_events_by_state (climate_df)
+########### Screen 1 Figures ################
+climate_df = get_cleaned_data("snowlm/data/disaster_declarations.csv", only_2000_onwards = False)
+climate_summary = number_of_disaster_events_by_state(climate_df)
 change_in_frequency(climate_summary)
 number_of_disasters_stat = number_of_disasters_over_last_decade(climate_summary)
 
@@ -28,7 +29,7 @@ df_climate_summary = climate_summary.groupby(["year", "disaster_type"])["total_n
 fig1 = px.bar(data_frame=df_climate_summary, x='total_number_of_events', y='year', color = "disaster_type")
 fig1.update_yaxes(categoryorder='category descending')
 
-########### Screen 2: Maps
+########### Screen 2: Maps ###################
 
 df = get_climate_econ_data(only_2000_onwards = True)
 df1 = df.groupby(["year", "state", "state_name"])["total_number_of_events"].sum().reset_index()
@@ -41,8 +42,6 @@ disaster_types = list(df.disaster_type.unique())
 )
 
 def update_choropleth_map(selected_map):
-
-
     if selected_map == 'map1':
         fig2 = px.choropleth(df1, locations='state', color='total_number_of_events', 
                             scope='usa', locationmode='USA-states', 
@@ -59,7 +58,7 @@ def update_choropleth_map(selected_map):
     return fig2
 
 
-###########Screen 2: Bubble Maps
+########## Screen 2: Bubble Graph ##########
 
 df_pop = get_climate_econ_pop_data()
 
@@ -70,10 +69,10 @@ fig3 = px.scatter(data, x="total_number_of_events", y="fed_amount", size="state_
                 animation_frame="year", color = "state", hover_name = "state")
 
 
-########### Screen 3: Census
+########### Screen 3: State and Census Level Information ###########
 
 
-####### Tables
+########### Tables for Top 5 disaster types per state #############
 
 # Top 5 Disasters Table
 disaster_events = type_of_disasters_by_state(climate_summary)
@@ -84,11 +83,18 @@ table = dash_table.DataTable(
                 data=top_disasters.to_dict('records'),)
 
 # Top 5 Federal Assistance Table
+df_econ_impact = clean_disaster_summaries("snowlm/data/PublicAssistanceFundedProjectsSummaries.csv", "snowlm/data/disaster_declarations.csv" )
+top_funding = top_5_by_public_assistance(df_econ_impact)
+top_5_funding = top_funding.sort_values(by='fed_amount', ascending=False).head(5)
 
-
+funding_table = dash_table.DataTable(
+                        id='funding-table',
+                        columns=[{'name': col, 'id': col} for col in top_5_funding.columns],
+                        data=top_5_funding.to_dict('records'),)
 
 @app.callback(
     Output('bar-chart', 'figure'),
+    Output('funding-table', 'data')
     Output('table', 'data'),
     Input('choropleth-map', 'clickData')
 )
@@ -98,7 +104,7 @@ def generate_graphs(clickData):
         state = clickData['points'][0]['location']
        
         # Create a bar graph 
-        df_climate = get_cleaned_data ("disaster_declarations.csv", only_2000_onwards = True)
+        df_climate = get_cleaned_data ("snowlm/data/disaster_declarations.csv", only_2000_onwards = True)
 
         num_days_in_disaster = {"states": number_of_days_in_dec_disaster(df_climate).keys(),
         "values": number_of_days_in_dec_disaster(df_climate).values()}
@@ -116,7 +122,10 @@ def generate_graphs(clickData):
         top_5_table = top_5.to_dict('records')
 
         #Create data table for top five states receiving federal funding
+        top5_funding = top_funding[top_funding['state'] == state]
+        top_5_assistance = top5_funding.sort_values(by='fed_amount', ascending=False).head(5)
 
+        top_5_assistance_table = top_5_assistance.to_dict('records')
 
         # Create visuals for county level information from each state
         census_data = clean_census_data_to_csv(data)
@@ -128,31 +137,19 @@ def generate_graphs(clickData):
         # fig5 = px.bar(data_frame=click_data, x= ['name_county', 'name_state', 'name_country'], 
         #                 y=['percent_unemployed', 'percent_unemployed_state', 'percent_unemployed_country'])
 
-        return fig4, top_5_table
+        return fig4, top_5_table, top_5_assistance_table
 
     else:
         return {}
 
-# fig_list = [fig4]
 
-########## Layout
+#################### Layout ######################
 
 # Header
 header = html.H4("Analysis of Weather-related Disasters in the United States",
              className="bg-primary text-white p-3 mb-2 text-center")
 
-# Jumbotron
-jumbotron = dbc.Col(html.Div(
-        [html.H4("42.63%", className="display-6"),
-         html.Hr(className="my-2"),
-         html.P(
-              "Disasters are increasing, over 42.63% of them took place since "
-              "2010 (when looking at a dataset from 1980-2010) "),],
-           className = "h-100 p-5 text-white bg-dark rounded-3",), 
-         md=12,)
-
 # Card
-
 first_card = dbc.Card(
     dbc.CardBody(
         [
@@ -215,6 +212,7 @@ app.layout = dbc.Container(
             ]),
             dbc.Row([
                 dbc.Col(table, md=6),
+                dbc.Col(funding_table, md=6),
             ])
         ],
         fluid = True,
@@ -309,3 +307,13 @@ if __name__ == '__main__':
 #                         "Disasters are increasing, over 42.63% of them took place since "
 #                         "2010 (when looking at a dataset from 1980-2010) "),],
 #                     className = "h-100 p-3 text-white bg-dark rounded-3",), width={'size': 6, 'offset': 0, 'order': 1}),
+
+# Jumbotron
+# jumbotron = dbc.Col(html.Div(
+#         [html.H4("42.63%", className="display-6"),
+#          html.Hr(className="my-2"),
+#          html.P(
+#               "Disasters are increasing, over 42.63% of them took place since "
+#               "2010 (when looking at a dataset from 1980-2010) "),],
+#            className = "h-100 p-5 text-white bg-dark rounded-3",), 
+#          md=12,)
