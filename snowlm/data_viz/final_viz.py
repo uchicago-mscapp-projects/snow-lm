@@ -17,7 +17,13 @@ from snowlm.scrape_api.census_api_query import *
 def climate_viz():
     dbc_css = "https://cdn.jsdelivr.net/gh/AnnMarieW/dash-bootstrap-templates/dbc.min.css"
     app = dash.Dash(__name__, external_stylesheets=[dbc.themes.SPACELAB, dbc_css])
-    # load_figure_template("spacelab")
+
+    app.css.append_css({
+    'external_url': 'https://fonts.googleapis.com/css?family=Roboto',
+    'font-size': '16px',
+    'color': '#333333',
+    'font-family': 'Roboto, sans-serif'
+    })
 
     ########### Screen 1 Figures ################
     climate_df = get_cleaned_data("snowlm/data/disaster_declarations.csv", only_2000_onwards = False)
@@ -28,7 +34,9 @@ def climate_viz():
 
     df_climate_summary = climate_summary.groupby(["year", "disaster_type"])["total_number_of_events"].sum().reset_index()
     fig1 = px.bar(data_frame=df_climate_summary, x='total_number_of_events', y='year', color = "disaster_type")
-    fig1.update_yaxes(categoryorder='category descending')
+    fig1.update_yaxes(title_text = 'Year', categoryorder='category descending')
+    fig1.update_xaxes(title_text='Total Number of Disaster Events')
+    # fig1.update_traces(name='Disaster Types')
 
     ########### Screen 2: Maps ###################
 
@@ -49,12 +57,14 @@ def climate_viz():
                                 animation_frame = 'year',
                                 color_continuous_scale=px.colors.sequential.OrRd,
                                 height = 650)
+            fig2.update_traces(name='Total Number of Disaster Events')
         else:
             fig2 = px.choropleth(df2, locations='state', color='fed_amount', 
                                 scope='usa', locationmode='USA-states', 
                                 animation_frame = 'year',
                                 color_continuous_scale=px.colors.sequential.OrRd,
                                 height = 650)
+            fig2.update_traces(name='Total FEMA Public Assistance Funding (in millions)')
 
         return fig2
 
@@ -104,10 +114,55 @@ def climate_viz():
 
         return final_df
 
+    ######## Voting Card #############
+    # def voting_card(state):
+    #     voting_data = scrape_voting_behavior()
+    #     voting_data['state'] = voting_data.index
+
+    #     df_voting = voting_data[voting_data['state'] == state]
+    #     yes_vote = df_voting['overal_yea'].iloc[0]
+    #     no_vote = df_voting['overall_nay'].iloc[0]
+
+    #     vote_yes = dbc.Card(
+    #     [
+    #         dbc.CardImg(src="https://cdn-icons-png.flaticon.com/512/7444/7444409.png", top=True),
+    #         dbc.CardBody(
+    #             [
+    #                 html.H4("Vote Yes", className="card-title"),
+    #                 html.P(str(yes_vote),
+    #                     className="card-text",
+    #                 ),
+    #             ]
+    #         ),
+    #     ],
+    #     id='vote-yes',
+    #     style={"width": "18rem"},
+    #     )
+
+    #     vote_no = dbc.Card(
+    #         [
+    #             dbc.CardImg(src="https://cdn-icons-png.flaticon.com/512/7444/7444427.png", top=True),
+    #             dbc.CardBody(
+    #                 [
+    #                     html.H4("Vote No", className="card-title"),
+    #                     html.P(str(voting_behavior()[1]),
+    #                         className="card-text",
+    #                     ),
+    #                 ]
+    #             ),
+    #         ],
+    #         id='vote-no',
+    #         style={"width": "18rem"},
+    #         )
+        
+    #     return vote_yes, vote_no
+
+    ############### Callbacks ####################
     @app.callback(
         [Output('bar-chart', 'figure'), Output('table', 'data'), 
         Output('funding-table', 'data'), Output('unemployed-bar', 'figure'),
-        Output('income-bar', 'figure'), Output('insurance-bar', 'figure')],
+        Output('insurance-bar', 'figure'), Output('income-bar', 'figure'),
+        Output('education-bar', 'figure')],
         [Input('choropleth-map', 'clickData')]
     )
 
@@ -142,39 +197,83 @@ def climate_viz():
             # Create visuals for county level information from each state
             df_census = api_query()
             click_data = df_census[df_census['state_code_alpha'] == state]
+            state_name = click_data['name_state'].iloc[0]
 
-            top10_unemployed = get_top_10_counties(click_data, state, 'percent_unemployed', 'percent_unemployed_state', 'percent_unemployed_us', False)
-            fig5 = px.bar(data_frame=top10_unemployed, x = 'name_county', y = 'percent_unemployed')
+            top10_unemployed = get_top_10_counties(click_data, state_name, 'percent_unemployed', 'percent_unemployed_state', 'percent_unemployed_us', False)
+            fig5 = px.bar(data_frame=top10_unemployed, x = 'name_county', y = 'percent_unemployed',
+                            color_discrete_sequence = ['#FF6B35'])
+            fig5.update_layout(title= f"Comparison of Unemployment Rate in Counties to {state_name} and National Average")
+    
 
 
-            top10_income = get_top_10_counties(click_data, state, 'median_household_income', 'median_household_income_state', 'median_household_income_us', True)
-            fig6 = px.bar(data_frame=top10_income, x = 'name_county', y = 'median_household_income')
+            top10_income = get_top_10_counties(click_data, state_name, 'median_household_income', 'median_household_income_state', 'median_household_income_us', True)
+            fig6 = px.bar(data_frame=top10_income, x = 'name_county', y = 'median_household_income',
+                            color_discrete_sequence = ['#5603AD'])
+            fig6.update_layout(title= f"Comparison of Median Household Income in Counties to {state_name} and National Average")
 
-            top10_noinsurance = get_top_10_counties(click_data, state, 'without_healthcare_coverage', 'without_healthcare_coverage_state', 'without_healthcare_coverage_us', False)
-            fig7 = px.bar(data_frame=top10_noinsurance, x = 'name_county', y = 'without_healthcare_coverage')
+            top10_noinsurance = get_top_10_counties(click_data, state_name, 'without_healthcare_coverage', 'without_healthcare_coverage_state', 'without_healthcare_coverage_us', False)
+            fig7 = px.bar(data_frame=top10_noinsurance, x = 'name_county', y = 'without_healthcare_coverage',
+                            color_discrete_sequence = ['#006D77'])
+            fig7.update_layout(title = "Comparison of Percent of Population Without Health Insurance Coverage")
 
-            return fig4, top_5_table, top_5_assistance_table, fig5, fig6, fig7
+            top10_education = get_top_10_counties(click_data, state_name, 'bach_or_higher', 'bach_or_higher_state', 'bach_or_higher_us', True)
+            fig8 = px.bar(data_frame=top10_education, x = 'name_county', y = 'bach_or_higher', 
+                            color_discrete_sequence = ['#4CC9F0'])
+            fig8.update_layout(title = f"Comparison of Education Levels in Counties to {state_name} and National Average")
+
+            # # Political Voting
+            # vote_yes = voting_card(state)[0]
+            # vote_no = voting_card(state)[1]
+
+            return fig4, top_5_table, top_5_assistance_table, fig5, fig6, fig7, fig8, #vote_yes, vote_no
         else:
             return {}
 
 
     #################### Layout ######################
 
-    # Header
+    # Text
     header = html.H4("Analysis of Weather-related Disasters in the United States",
                 className="bg-primary text-white p-3 mb-2 text-center")
 
-    # Card
-    first_card = dbc.Card(
-        dbc.CardBody(
-            [
-                html.H5("42.63%", className="card-title"),
-                html.P("Disasters are increasing, over 42.63% of them took place since "
-                        "2010 (when looking at a dataset from 1980-2022)"),
-                # dbc.Button("Go somewhere", color="primary"),
-            ]
-        )
+    # intro_text = 
+
+    # maps_text = 
+
+    # bubble_map_text = 
+    
+    census_text = html.Div(
+        [
+        html.P(" At the county level, we can see in greater detail some information"
+            "about the populations being affected by climate disasters and their" 
+            "socioeconomic circumstances. We’ve highlighted some circumstances"
+            " (such as lack of health insurance and unemployment) that would make"
+            " dealing with weather-related disasters especially challenging for "
+            " these populations. In the bar charts below, clockwise, we show the"
+            " racial breakdown of each state compared to the United States as a whole,"
+            " the ten counties with the highest rates of unemployment, the ten counties"
+            " with the lowest household income levels, and the ten counties with the"
+            " greatest percent of the population without health insurance."),
+        ],
+    className="my-4",
     )
+
+
+    # https://cdn.5280.com/2022/10/00-Denver-Voting-Guide.jpg
+    # https://cdn-icons-png.flaticon.com/512/7444/7444409.png
+    # https://cdn-icons-png.flaticon.com/512/7444/7444427.png
+
+    # first_card = dbc.Card(
+    #     dbc.CardBody(
+    #         [
+    #             html.H5("42.63%", className="card-title"),
+    #             html.P("Disasters are increasing, over 42.63% of them took place since "
+    #                     "2010 (when looking at a dataset from 1980-2022)"),
+    #             # dbc.Button("Go somewhere", color="primary"),
+    #         ]
+    #     )
+    # )
+
 
 
     #Dropdown
@@ -207,7 +306,7 @@ def climate_viz():
             header,
             dbc.Row([
                 dbc.Col([
-                    dcc.Graph(id='stacked-bar-chart', figure=fig1)
+                    dcc.Graph(id='stacked-bar-chart', figure=fig1, style={"height":"500px"}),
                 ], width={'size': 12, 'offset': 0, 'order': 1}),
                 # dbc.Col(first_card, width={'size': 4, 'offset': 0, 'order': 1}),
             ]),
@@ -219,29 +318,35 @@ def climate_viz():
             ]),
             dbc.Row([
                 dbc.Col([
-                    dcc.Graph(id='scatter-bubble', figure=fig3)
-                ], width={'size': 12, 'offset': 0, 'order': 2}),
+                    dcc.Graph(id='scatter-bubble', figure=fig3, style={"height":"500px"})
+                ], width={'size': 12, 'offset': 0, 'order': 1}),
             ]),
             dbc.Row([
                 dbc.Col([
                     dcc.Graph(id='bar-chart')
-                ], width={'size': 6, 'offset': 0, 'order': 2}),
+                ], width={'size': 6, 'offset': 0, 'order': 1}),
+                # dbc.Col(vote_yes, width={'size': 3, 'offset': 0, 'order': 2}),
+                # dbc.Col(vote_no, width={'size': 3, 'offset': 0, 'order': 3})
             ]),
             dbc.Row([
                 dbc.Col(table, md=6),
                 dbc.Col(funding_table, md=6),
             ]),
+            census_text,
             dbc.Row([
                 dbc.Col([
                     dcc.Graph(id='unemployed-bar')
-                ], width={'size': 6, 'offset': 0, 'order': 2}),
+                ], width={'size': 6, 'offset': 0, 'order': 1}),
                 dbc.Col([
-                    dcc.Graph(id='income-bar')
+                    dcc.Graph(id='insurance-bar')
                 ], width={'size': 6, 'offset': 0, 'order': 2}),
             ]), 
             dbc.Row([
                 dbc.Col([
-                    dcc.Graph(id='insurance-bar')
+                    dcc.Graph(id='income-bar')
+                ], width={'size': 6, 'offset': 0, 'order': 1}),
+                dbc.Col([
+                    dcc.Graph(id='education-bar')
                 ], width={'size': 6, 'offset': 0, 'order': 2}),
             ])
         ],
