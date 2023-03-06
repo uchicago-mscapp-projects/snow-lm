@@ -12,6 +12,7 @@ from snowlm.data_analysis.climate import *
 from snowlm.data_analysis.economic_impact import *
 from snowlm.data_analysis.climate_econ_pop import *
 from snowlm.scrape_api.census_api_query import *
+from snowlm.scrape_api.voting_record import *
 
 
 def climate_viz():
@@ -62,7 +63,7 @@ def climate_viz():
             fig2 = px.choropleth(df2, locations='state', color='fed_amount', 
                                 scope='usa', locationmode='USA-states', 
                                 animation_frame = 'year',
-                                color_continuous_scale=px.colors.sequential.OrRd,
+                                color_continuous_scale=px.colors.sequential.matter,
                                 height = 650)
             fig2.update_traces(name='Total FEMA Public Assistance Funding (in millions)')
 
@@ -115,13 +116,15 @@ def climate_viz():
         return final_df
 
     ######## Voting Card #############
-    # def voting_card(state):
-    #     voting_data = scrape_voting_behavior()
-    #     voting_data['state'] = voting_data.index
+    def voting_card(state):
+        voting_data = scrape_voting_behavior()
+        voting_data['state'] = voting_data.index
 
-    #     df_voting = voting_data[voting_data['state'] == state]
-    #     yes_vote = df_voting['overal_yea'].iloc[0]
-    #     no_vote = df_voting['overall_nay'].iloc[0]
+        df_voting = voting_data[voting_data['state'] == state]
+        yes_vote = df_voting['overal_yea'].iloc[0]
+        no_vote = df_voting['overall_nay'].iloc[0]
+
+        return yes_vote, no_vote
 
     #     vote_yes = dbc.Card(
     #     [
@@ -162,7 +165,7 @@ def climate_viz():
         [Output('bar-chart', 'figure'), Output('table', 'data'), 
         Output('funding-table', 'data'), Output('unemployed-bar', 'figure'),
         Output('insurance-bar', 'figure'), Output('income-bar', 'figure'),
-        Output('education-bar', 'figure')],
+        Output('education-bar', 'figure'), Output('voting', 'figure')],
         [Input('choropleth-map', 'clickData')]
     )
 
@@ -222,10 +225,12 @@ def climate_viz():
             fig8.update_layout(title = f"Comparison of Education Levels in Counties to {state_name} and National Average")
 
             # # Political Voting
-            # vote_yes = voting_card(state)[0]
-            # vote_no = voting_card(state)[1]
+            
+            fig9 = px.bar(x=['Yes', 'No'], y = [voting_card(state)[0], voting_card(state)[1]],
+                    color_discrete_map={'Yes':'blue',  'No': 'red'},
+                    title= f"Voting Record for IRA Climate Bill in {state_name}")
 
-            return fig4, top_5_table, top_5_assistance_table, fig5, fig6, fig7, fig8, #vote_yes, vote_no
+            return fig4, top_5_table, top_5_assistance_table, fig5, fig6, fig7, fig8, fig9 #vote_yes, vote_no
         else:
             return {}
 
@@ -325,6 +330,9 @@ def climate_viz():
                 dbc.Col([
                     dcc.Graph(id='bar-chart')
                 ], width={'size': 6, 'offset': 0, 'order': 1}),
+                dbc.Col([
+                    dcc.Graph(id='voting')
+                ], width={'size': 6, 'offset': 0, 'order': 2}),
                 # dbc.Col(vote_yes, width={'size': 3, 'offset': 0, 'order': 2}),
                 # dbc.Col(vote_no, width={'size': 3, 'offset': 0, 'order': 3})
             ]),
