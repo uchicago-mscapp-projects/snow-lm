@@ -19,13 +19,6 @@ def climate_viz():
     dbc_css = "https://cdn.jsdelivr.net/gh/AnnMarieW/dash-bootstrap-templates/dbc.min.css"
     app = dash.Dash(__name__, external_stylesheets=[dbc.themes.SPACELAB, dbc_css])
 
-    app.css.append_css({
-    'external_url': 'https://fonts.googleapis.com/css?family=Roboto',
-    'font-size': '16px',
-    'color': '#333333',
-    'font-family': 'Roboto, sans-serif'
-    })
-
     ########### Screen 1 Figures ################
     climate_df = get_cleaned_data("snowlm/data/disaster_declarations.csv", only_2000_onwards = False)
     climate_summary = number_of_disaster_events_by_state(climate_df)
@@ -84,6 +77,8 @@ def climate_viz():
                     animation_frame="year", color = "state", hover_name = "state",
                     title="Relationship between Disasters and Funding Received by Size of State Over Time")
     fig3.update_layout(title_x=0.5)
+    fig3.update_xaxes(title_text="Number of Disasters")
+    fig3.update_yaxes(title_text="FEMA Funding")
 
 
     ########### Screen 3: State and Census Level Information ###########
@@ -131,40 +126,6 @@ def climate_viz():
 
         return yes_vote, no_vote
 
-    #     vote_yes = dbc.Card(
-    #     [
-    #         dbc.CardImg(src="https://cdn-icons-png.flaticon.com/512/7444/7444409.png", top=True),
-    #         dbc.CardBody(
-    #             [
-    #                 html.H4("Vote Yes", className="card-title"),
-    #                 html.P(str(yes_vote),
-    #                     className="card-text",
-    #                 ),
-    #             ]
-    #         ),
-    #     ],
-    #     id='vote-yes',
-    #     style={"width": "18rem"},
-    #     )
-
-    #     vote_no = dbc.Card(
-    #         [
-    #             dbc.CardImg(src="https://cdn-icons-png.flaticon.com/512/7444/7444427.png", top=True),
-    #             dbc.CardBody(
-    #                 [
-    #                     html.H4("Vote No", className="card-title"),
-    #                     html.P(str(voting_behavior()[1]),
-    #                         className="card-text",
-    #                     ),
-    #                 ]
-    #             ),
-    #         ],
-    #         id='vote-no',
-    #         style={"width": "18rem"},
-    #         )
-        
-    #     return vote_yes, vote_no
-
     ############### Callbacks ####################
     @app.callback(
         [Output('bar-chart', 'figure'), Output('table', 'data'), 
@@ -185,10 +146,13 @@ def climate_viz():
             "values": number_of_days_in_dec_disaster(df_climate).values()}
             disaster_days = pd.DataFrame.from_dict(num_days_in_disaster)
 
-            fig4 = px.bar(disaster_days, x = "states", y = "values")
+            fig4 = px.bar(disaster_days, x = "states", y = "values",
+                        title="Average Number of Days Yearly in a Disaster Scenario")
             highlight_values = [f"{state}", 'National Average']
             highlight_color = 'red'
             fig4.update_traces(marker=dict(color=[highlight_color if x in highlight_values else 'blue' for x in disaster_days["states"]]))
+            fig4.update_yaxes(title_text="Average Number of Days")
+            fig4.update_layout(title_x=0.5)
 
             #Create data table for top five disaster events for each state
             top5_disasters = disaster_events[disaster_events['state'] == state]
@@ -205,6 +169,7 @@ def climate_viz():
 
             # Create visuals for county level information from each state
             df_census = api_query()
+            df_census = df_census.loc[df_census["state_and_county_code"] != "48301"]
             click_data = df_census[df_census['state_code_alpha'] == state]
             state_name = click_data['name_state'].iloc[0]
 
@@ -212,27 +177,38 @@ def climate_viz():
             fig5 = px.bar(data_frame=top10_unemployed, x = 'name_county', y = 'percent_unemployed',
                             color_discrete_sequence = ['#FF6B35'])
             fig5.update_layout(title= f"Comparison of Unemployment Rate in Counties to {state_name} and National Average")
+            fig5.update_xaxes(title_text="Geographic Region")
+            fig5.update_yaxes(title_text="Unemployment Rate")
 
             top10_income = get_top_10_counties(click_data, state_name, 'median_household_income', 'median_household_income_state', 'median_household_income_us', True)
             fig6 = px.bar(data_frame=top10_income, x = 'name_county', y = 'median_household_income',
                             color_discrete_sequence = ['#5603AD'])
             fig6.update_layout(title= f"Comparison of Median Household Income in Counties to {state_name} and National Average")
+            fig6.update_xaxes(title_text="Geographic Region")
+            fig6.update_yaxes(title_text="Median Household Income")
 
             top10_noinsurance = get_top_10_counties(click_data, state_name, 'without_healthcare_coverage', 'without_healthcare_coverage_state', 'without_healthcare_coverage_us', False)
             fig7 = px.bar(data_frame=top10_noinsurance, x = 'name_county', y = 'without_healthcare_coverage',
                             color_discrete_sequence = ['#006D77'])
             fig7.update_layout(title = "Comparison of Percent of Population Without Health Insurance Coverage")
+            fig7.update_xaxes(title_text="Geographic Region")
+            fig7.update_yaxes(title_text="Percent of Population with No Health Insurance")
 
             top10_education = get_top_10_counties(click_data, state_name, 'bach_or_higher', 'bach_or_higher_state', 'bach_or_higher_us', True)
             fig8 = px.bar(data_frame=top10_education, x = 'name_county', y = 'bach_or_higher', 
                             color_discrete_sequence = ['#4CC9F0'])
             fig8.update_layout(title = f"Comparison of Education Levels in Counties to {state_name} and National Average")
+            fig8.update_xaxes(title_text="Geographic Region")
+            fig8.update_yaxes(title_text="Bachelor or Higher Education Completion Rate")
 
             # # Political Voting
             
             fig9 = px.bar(x=['Yes', 'No'], y = [voting_card(state)[0], voting_card(state)[1]],
                     color_discrete_map={'Yes':'blue',  'No': 'red'},
-                    title= f"Voting Record for IRA Climate Bill in {state_name}")
+                    title= f"Senators Voting for the Climate Bill in {state_name}")
+            fig9.update_xaxes(title_text="Voting Record")
+            fig9.update_yaxes(title_text="Number of Votes")
+            fig9.update_layout(title_x=0.5)
 
             return fig4, top_5_table, top_5_assistance_table, fig5, fig6, fig7, fig8, fig9 #vote_yes, vote_no
         else:
@@ -305,15 +281,13 @@ def climate_viz():
     style={"color": "black", "font-family": "Garamond", "font-size": "20px"}
     )
     
-    
-
     maps_text = html.Div(
         [
-        html.P("Choose between the number of disaster events or the public "
+        html.P(["Choose between the number of disaster events or the public "
         "assistance provided for disaster management to see how their patterns "
         "have changed between 2000-2022. In general, we see that California, "
-        "Texas, and Florida face the most amount of disasters. Click on a state "
-        "to get granular state and county-level information!" 
+        "Texas, and Florida face the most amount of disasters. ", html.Strong("Click on a state"
+        " to get granular state and county-level information!")], 
         ),
         ],
     className="my-4",
@@ -338,7 +312,7 @@ def climate_viz():
         "scenario. On average, a state is in a situation where a disaster has been "
         "declared 15 days a year between 2000-2022.  The Federated States of Micronesia "
         "(FM) stands out as an outlier since it is located in the Pacific Ring "
-        "of Fire and is prone to ", html.A("disasters", href="https://www.undrr.org/media/81878/download#:~:text=FSM%20is%20located%20in%20the,claim%20people's%20lives%20and%20livestock."), 
+        "of Fire and is prone to ", html.A("disasters.", href="https://www.undrr.org/media/81878/download#:~:text=FSM%20is%20located%20in%20the,claim%20people's%20lives%20and%20livestock."), 
         ]),
         html.P(["The Inflation Reduction Act of 2022 calls for investment in "
         "domestic clean energy production and aims to substantially reduce carbon "
@@ -404,24 +378,35 @@ def climate_viz():
     style={"color": "black", "font-family": "Garamond", "font-size": "20px"}
     )
 
+    # Section Heading
 
+    intro1_text = html.Div(
+        [
+        html.H2([html.Strong("Introduction:")]),
+        ],
+        className="my-4",
+        style={"color": "black", "font-family": "Garamond", "font-size": "15px"})
 
-    # https://cdn.5280.com/2022/10/00-Denver-Voting-Guide.jpg
-    # https://cdn-icons-png.flaticon.com/512/7444/7444409.png
-    # https://cdn-icons-png.flaticon.com/512/7444/7444427.png
+    section1_text = html.Div(
+        [
+        html.H2([html.Strong("Section 1: National Trends")]),
+        ],
+        className="my-4",
+        style={"color": "black", "font-family": "Garamond", "font-size": "15px"})
 
-    # first_card = dbc.Card(
-    #     dbc.CardBody(
-    #         [
-    #             html.H5("42.63%", className="card-title"),
-    #             html.P("Disasters are increasing, over 42.63% of them took place since "
-    #                     "2010 (when looking at a dataset from 1980-2022)"),
-    #             # dbc.Button("Go somewhere", color="primary"),
-    #         ]
-    #     )
-    # )
+    section2_text = html.Div(
+        [
+        html.H2([html.Strong("Section 2: State-Level Trends")]),
+        ],
+        className="my-4",
+        style={"color": "black", "font-family": "Garamond", "font-size": "15px"})
 
-
+    section3_text = html.Div(
+        [
+        html.H2([html.Strong("Section 3: County-Level Trends")]),
+        ],
+        className="my-4",
+        style={"color": "black", "font-family": "Garamond", "font-size": "15px"})
 
     #Dropdown
     dropdown_options = [
@@ -436,16 +421,6 @@ def climate_viz():
             value="map1",),],
             className="mb-4",)
 
-    # Checklist
-    # checklist = html.Div(
-    #         [dbc.Label("Select a disaster type"),
-    #         dbc.Checklist(
-    #         id = "checklist",
-    #         options=[{"label": i, "value": i} for i in disaster_types],
-    #         value = [],
-    #         inline = True,),],
-    #         className="mb-4",)
-
     selec_input = dbc.Card([dropdown], body=True)
 
     app.layout = dbc.Container(
@@ -453,20 +428,23 @@ def climate_viz():
             header,
             subheader,
             date,
+            intro1_text,
             intro_text,
+            section1_text,
             bar_text,
             dbc.Row([
                 dbc.Col([
                     dcc.Graph(id='stacked-bar-chart', figure=fig1, style={"height":"600px"}),
                 ], width={'size': 12, 'offset': 0, 'order': 1}),
-                # dbc.Col(first_card, width={'size': 4, 'offset': 0, 'order': 1}),
             ]),
+            section2_text,
             maps_text,
             dbc.Row([
+                dropdown,
                 dbc.Col([
                     dcc.Graph(id='choropleth-map')
-                ], width={'size': 9, 'offset': 0, 'order': 1}),
-                dbc.Col([selec_input], width=3)
+                ], width={'size': 12, 'offset': 0, 'order': 1}),
+                # dbc.Col([selec_input], width=3)
             ]),
             bubble_map_text,
             dbc.Row([
@@ -478,18 +456,17 @@ def climate_viz():
             dbc.Row([
                 dbc.Col([
                     dcc.Graph(id='bar-chart')
-                ], width={'size': 6, 'offset': 0, 'order': 1}),
+                ], width={'size': 8, 'offset': 0, 'order': 1}),
                 dbc.Col([
                     dcc.Graph(id='voting')
-                ], width={'size': 6, 'offset': 0, 'order': 2}),
-                # dbc.Col(vote_yes, width={'size': 3, 'offset': 0, 'order': 2}),
-                # dbc.Col(vote_no, width={'size': 3, 'offset': 0, 'order': 3})
+                ], width={'size': 4, 'offset': 0, 'order': 2}),
             ]),
             table_text,
             dbc.Row([
                 dbc.Col([dbc.Label('Top 5 Disaster Events'), table], md=6),
                 dbc.Col([dbc.Label("Top 5 Disaster Events by FEMA Public Assistance"), funding_table], md=6),
             ]),
+            section3_text,
             census_text,
             dbc.Row([
                 dbc.Col([
@@ -612,3 +589,64 @@ def climate_viz():
 #            className = "h-100 p-5 text-white bg-dark rounded-3",), 
 #          md=12,)
 
+    #     vote_yes = dbc.Card(
+    #     [
+    #         dbc.CardImg(src="https://cdn-icons-png.flaticon.com/512/7444/7444409.png", top=True),
+    #         dbc.CardBody(
+    #             [
+    #                 html.H4("Vote Yes", className="card-title"),
+    #                 html.P(str(yes_vote),
+    #                     className="card-text",
+    #                 ),
+    #             ]
+    #         ),
+    #     ],
+    #     id='vote-yes',
+    #     style={"width": "18rem"},
+    #     )
+
+    #     vote_no = dbc.Card(
+    #         [
+    #             dbc.CardImg(src="https://cdn-icons-png.flaticon.com/512/7444/7444427.png", top=True),
+    #             dbc.CardBody(
+    #                 [
+    #                     html.H4("Vote No", className="card-title"),
+    #                     html.P(str(voting_behavior()[1]),
+    #                         className="card-text",
+    #                     ),
+    #                 ]
+    #             ),
+    #         ],
+    #         id='vote-no',
+    #         style={"width": "18rem"},
+    #         )
+        
+    #     return vote_yes, vote_no
+
+       # Checklist
+    # checklist = html.Div(
+    #         [dbc.Label("Select a disaster type"),
+    #         dbc.Checklist(
+    #         id = "checklist",
+    #         options=[{"label": i, "value": i} for i in disaster_types],
+    #         value = [],
+    #         inline = True,),],
+    #         className="mb-4",)
+
+
+
+
+    # https://cdn.5280.com/2022/10/00-Denver-Voting-Guide.jpg
+    # https://cdn-icons-png.flaticon.com/512/7444/7444409.png
+    # https://cdn-icons-png.flaticon.com/512/7444/7444427.png
+
+    # first_card = dbc.Card(
+    #     dbc.CardBody(
+    #         [
+    #             html.H5("42.63%", className="card-title"),
+    #             html.P("Disasters are increasing, over 42.63% of them took place since "
+    #                     "2010 (when looking at a dataset from 1980-2022)"),
+    #             # dbc.Button("Go somewhere", color="primary"),
+    #         ]
+    #     )
+    # )
