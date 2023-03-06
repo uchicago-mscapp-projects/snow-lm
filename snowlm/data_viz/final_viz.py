@@ -94,7 +94,7 @@ def climate_viz():
                             data=top_5_funding.to_dict('records'),)
 
     @app.callback(
-        [Output('table', 'data'), Output('funding-table', 'data'), Output('bar-chart', 'figure')],
+        [Output('bar-chart', 'figure'), Output('table', 'data'), Output('funding-table', 'data')],
         [Input('choropleth-map', 'clickData')]
     )
 
@@ -132,12 +132,12 @@ def climate_viz():
             click_data = df_census[df_census['state_code_alpha'] == state]
 
 
-            fig5 = px.bar(data_frame=click_data, x= ['name_county', 'name_state', 'name_country'], 
-                            y=['percent_unemployed', 'percent_unemployed_state', 'percent_unemployed_country'])
+            # fig5 = px.bar(data_frame=click_data, x= ['name_county', 'name_state', 'name_country'], 
+                            # y=['percent_unemployed', 'percent_unemployed_state', 'percent_unemployed_country'])
 
             # fig5
 
-            return fig4, top_5_table, top_5_assistance_table, fig5
+            return fig4, top_5_table, top_5_assistance_table
         else:
             return {}
 
