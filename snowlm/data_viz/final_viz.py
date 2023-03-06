@@ -202,15 +202,14 @@ def climate_viz():
             fig8.update_yaxes(title_text="Bachelor or Higher Education Completion Rate")
 
             # # Political Voting
-            
+            color_map = {'Yes':'blue',  'No': 'green'}
             fig9 = px.bar(x=['Yes', 'No'], y = [voting_card(state)[0], voting_card(state)[1]],
-                    color_discrete_map={'Yes':'blue',  'No': 'red'},
+                    color_discrete_map=color_map,
                     title= f"Senators Voting for the Climate Bill in {state_name}")
             fig9.update_xaxes(title_text="Voting Record")
             fig9.update_yaxes(title_text="Number of Votes")
             fig9.update_layout(title_x=0.5)
-
-            return fig4, top_5_table, top_5_assistance_table, fig5, fig6, fig7, fig8, fig9 #vote_yes, vote_no
+            return fig4, top_5_table, top_5_assistance_table, fig5, fig6, fig7, fig8, fig9
         else:
             return {}
 
@@ -218,11 +217,11 @@ def climate_viz():
     #################### Layout ######################
 
     # Text
-    header = html.H4("Investigating Patterns ofClimate-related Natural Disasters in the United States",
+    header = html.H4("Investigating Patterns of Climate-related Natural Disasters in the United States",
                 className="bg-primary text-white p-3 mb-2 text-center")
     
     subheader = html.H5(
-                "Jackie Glasheen, Jen Yeaton, Harsh Pachisia, Shwetha Srinivasan",
+                "Jackie Glasheen, Jen Yeaton, Harsh Vardhan Pachisia, Shwetha Srinivasan",
                 className="p-2 mb-2 text-center",
                 style={"font-size": "20px"})
     
@@ -440,9 +439,9 @@ def climate_viz():
             section2_text,
             maps_text,
             dbc.Row([
-                dropdown,
                 dbc.Col([
-                    dcc.Graph(id='choropleth-map')
+                    dropdown,
+                    dcc.Graph(id='choropleth-map', style={'width': '100vw', "height":"600px"})
                 ], width={'size': 12, 'offset': 0, 'order': 1}),
                 # dbc.Col([selec_input], width=3)
             ]),
