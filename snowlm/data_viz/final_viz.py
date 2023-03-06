@@ -183,7 +183,7 @@ def climate_viz():
             top10_income = get_top_10_counties(click_data, state_name, 'median_household_income', 'median_household_income_state', 'median_household_income_us', True)
             fig6 = px.bar(data_frame=top10_income, x = 'name_county', y = 'median_household_income',
                             color_discrete_sequence = ['#5603AD'])
-            fig6.update_layout(title= f"Comparison of Median Household Income in Counties to {state_name} and National Average")
+            fig6.update_layout(title= f"Comparison of Median Household Income in Counties to {state_name} & National Avg.")
             fig6.update_xaxes(title_text="Geographic Region")
             fig6.update_yaxes(title_text="Median Household Income")
 
@@ -192,7 +192,7 @@ def climate_viz():
                             color_discrete_sequence = ['#006D77'])
             fig7.update_layout(title = "Comparison of Percent of Population Without Health Insurance Coverage")
             fig7.update_xaxes(title_text="Geographic Region")
-            fig7.update_yaxes(title_text="Percent of Population with No Health Insurance")
+            fig7.update_yaxes(title_text="% of Population with No Health Insurance")
 
             top10_education = get_top_10_counties(click_data, state_name, 'bach_or_higher', 'bach_or_higher_state', 'bach_or_higher_us', True)
             fig8 = px.bar(data_frame=top10_education, x = 'name_county', y = 'bach_or_higher', 
@@ -233,7 +233,7 @@ def climate_viz():
     intro_text = html.Div(
         [
         html.P([html.Strong("42.63 %"), " of natural "
-        "disasters in the United States" 
+        "disasters in the United States since 1980" 
         " have taken place over the last 12 years. It is evident that climate "
         "change and global warming are causing extreme weather disasters to "
         "occur with more frequency. The increase in natural disaster declarations "
@@ -249,9 +249,8 @@ def climate_viz():
         "and communities disproportionately. Through this dashboard, we hope to "
         "shed light on the increase in disaster frequency and cost nationwide. "
         "We highlight the specific situation in each state, where its political "
-        "stance is on climate, and showcase the current socio-economic breakup "
-        "of major counties that have been affected by disasters, to highlight the "
-        "communities that are the most vulnerable to such events and need long-term "
+        "stance is on climate, and showcase the top 10 counties that are at most "
+        "risk based on current socio-economic factors and require long-term "
         "policy actions to tackle disasters."
         ]),
 
@@ -261,7 +260,7 @@ def climate_viz():
         href="https://www.fema.gov/openfema-data-page/public-assistance-funded-project-summaries-v1"), 
         " data from the Federal Emergency Management Agency, "
         "scraped data of the voting patterns on the Climate IRA bill, and the "
-        "Census API for county-level socio-economic breakdown."
+        "US Census API for county, state and national-level socio-economic breakdown."
         ]),
         ],
     className="my-4",
@@ -284,8 +283,10 @@ def climate_viz():
         [
         html.P(["Choose between the number of disaster events or the public "
         "assistance provided for disaster management to see how their patterns "
-        "have changed between 2000-2022. In general, we see that California, "
-        "Texas, and Florida face the most amount of disasters. ", html.Strong("Click on a state"
+        "have changed between 2000-2022. In general, while there is certainly "
+        "year to year variation, we see that California, "
+        "Texas, and Florida face the most amount of disasters (not normalized "
+        "by landmass).", html.Strong("Click on a state"
         " to get granular state and county-level information!")], 
         ),
         ],
@@ -341,7 +342,7 @@ def climate_viz():
     census_text = html.Div(
         [
         html.P(" At the county level, we can see in greater detail some information"
-            "about the populations being affected by climate disasters and their" 
+            "about the populations in each state and their" 
             "socioeconomic circumstances. We’ve highlighted some circumstances"
             " (such as lack of health insurance and unemployment) that would make"
             " dealing with weather-related disasters especially challenging for "
@@ -441,9 +442,8 @@ def climate_viz():
             dbc.Row([
                 dbc.Col([
                     dropdown,
-                    dcc.Graph(id='choropleth-map', style={'width': '100vw', "height":"600px"})
-                ], width={'size': 12, 'offset': 0, 'order': 1}),
-                # dbc.Col([selec_input], width=3)
+                    dcc.Graph(id='choropleth-map', style={"height":"600px"})
+                ], width={'size': 12, 'offset': 0, 'order': 2}),
             ]),
             bubble_map_text,
             dbc.Row([
