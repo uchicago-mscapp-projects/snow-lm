@@ -241,7 +241,43 @@ def climate_viz():
     header = html.H4("Analysis of Weather-related Disasters in the United States",
                 className="bg-primary text-white p-3 mb-2 text-center")
 
-    # intro_text = 
+    intro_text = html.Div(
+        [
+        html.P([html.Strong("42.63 %"), " of natural "
+        "disasters in the United States" 
+        " have taken place over the last 12 years. It is evident that climate "
+        "change and global warming are causing extreme weather disasters to "
+        "occur with more frequency. The increase in natural disaster declarations "
+        "over the past several decades has led to the federal government spending "
+        "more money on disaster relief.  Due to the increase in frequency and cost "
+        "of such disasters, a Congressional Research Service ", html.A("paper", 
+        href="https://sgp.fas.org/crs/homesec/R45484.pdf"), " from January "
+        "2022 suggests that Congress may consider limiting federal disaster relief "
+        "spending."
+        ]),
+        
+        html.P(["Disasters impact different geographic regions, affecting specific states "
+        "and communities disproportionately. Through this dashboard, we hope to "
+        "shed light on the increase in disaster frequency and cost nationwide. "
+        "We highlight the specific situation in each state, where its political "
+        "stance is on climate, and showcase the current socio-economic breakup "
+        "of major counties that have been affected by disasters, to highlight the "
+        "communities that are the most vulnerable to such events and need long-term "
+        "policy actions to tackle disasters."
+        ]),
+
+        html.P(["This dashboard was built using Python and Dash, using ", html.A("climate disaster", 
+        href="https://www.fema.gov/openfema-data-page/disaster-declarations-summaries-v2"),
+        " and ", html.A("public assistance", 
+        href="https://www.fema.gov/openfema-data-page/public-assistance-funded-project-summaries-v1"), 
+        " data from the Federal Emergency Management Agency, "
+        "scraped data of the voting patterns on the Climate IRA bill, and the "
+        "Census API for county-level socio-economic breakdown."
+        ]),
+        ],
+    className="my-4",
+    style={"color": "black", "font-family": "Garamond", "font-size": "20px"}
+    )
 
     # maps_text = 
 
@@ -261,6 +297,7 @@ def climate_viz():
             " greatest percent of the population without health insurance."),
         ],
     className="my-4",
+    style={"color": "black", "font-family": "Garamond", "font-size": "20px"}
     )
 
 
@@ -309,6 +346,7 @@ def climate_viz():
     app.layout = dbc.Container(
         [
             header,
+            intro_text,
             dbc.Row([
                 dbc.Col([
                     dcc.Graph(id='stacked-bar-chart', figure=fig1, style={"height":"500px"}),
@@ -460,3 +498,4 @@ def climate_viz():
 #               "2010 (when looking at a dataset from 1980-2010) "),],
 #            className = "h-100 p-5 text-white bg-dark rounded-3",), 
 #          md=12,)
+
