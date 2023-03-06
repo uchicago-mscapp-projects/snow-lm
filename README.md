@@ -29,9 +29,3 @@ This project can be run using Poetry. The steps are outlined below.
 5. Run the project: `python3 -m snowlm`
 
 It will ask you to open the dash application in the browser to see the interactive dashboard. 
-
-### Example Charts
-
-![Trends in Number of Disaters](https://drive.google.com/file/d/1b5LcTK_xHHWHlqe9LvI3PgQm-4jkCMeo/view?usp=sharing)
-
-![Disasters in states across years](https://drive.google.com/file/d/1b5LcTK_xHHWHlqe9LvI3PgQm-4jkCMeo/view?usp=sharing)
