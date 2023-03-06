@@ -27,7 +27,7 @@ disasters.incidentType.value_counts()
 # 'Human Cause','Fishing Losses'. 
 #2. 'Severe Storms' and 'Severe Storm(s)' are repeated, needs to be checked.
 
-disasters.loc[disasters["incidentType"] == "Snow"]
+disasters.loc[disasters["incidentType"] == "Severe Storms(s)"]
 # only 3 severe storms(s) (based on disaster numbers). 
 # check if they overlap with 'Severe Storm'.
 disasters.loc[disasters["disasterNumber"] == 4670]
