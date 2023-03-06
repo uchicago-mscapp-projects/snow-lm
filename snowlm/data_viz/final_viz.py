@@ -34,10 +34,11 @@ def climate_viz():
 
 
     df_climate_summary = climate_summary.groupby(["year", "disaster_type"])["total_number_of_events"].sum().reset_index()
-    fig1 = px.bar(data_frame=df_climate_summary, x='total_number_of_events', y='year', color = "disaster_type")
+    fig1 = px.bar(data_frame=df_climate_summary, x='total_number_of_events', y='year', color = "disaster_type",
+                title="Total Number of Disaster Events from 1980 by State")
     fig1.update_yaxes(title_text = 'Year', categoryorder='category descending')
     fig1.update_xaxes(title_text='Total Number of Disaster Events')
-    # fig1.update_traces(name='Disaster Types')
+    fig1.update_layout(legend_title="Disaster Types", title_x=0.5)
 
     ########### Screen 2: Maps ###################
 
@@ -57,15 +58,17 @@ def climate_viz():
                                 scope='usa', locationmode='USA-states', 
                                 animation_frame = 'year',
                                 color_continuous_scale=px.colors.sequential.OrRd,
-                                height = 650)
-            fig2.update_traces(name='Total Number of Disaster Events')
+                                height = 650,
+                                title="Map with Number of Disasters from 2000-2022")
+            fig2.update_layout(coloraxis_colorbar_title='Number of Disasters', title_x=0.5)
         else:
             fig2 = px.choropleth(df2, locations='state', color='fed_amount', 
                                 scope='usa', locationmode='USA-states', 
                                 animation_frame = 'year',
                                 color_continuous_scale=px.colors.sequential.matter,
-                                height = 650)
-            fig2.update_traces(name='Total FEMA Public Assistance Funding (in millions)')
+                                height = 650,
+                                title="Map with FEMA Public Assistance from 2000-2022")
+            fig2.update_layout(coloraxis_colorbar_title='FEMA Funding', title_x=0.5)
 
         return fig2
 
@@ -78,7 +81,9 @@ def climate_viz():
     data = data.sort_values('year', ascending=True)
 
     fig3 = px.scatter(data, x="total_number_of_events", y="fed_amount", size="state_pop", 
-                    animation_frame="year", color = "state", hover_name = "state")
+                    animation_frame="year", color = "state", hover_name = "state",
+                    title="Relationship between Disasters and Funding Received by Size of State Over Time")
+    fig3.update_layout(title_x=0.5)
 
 
     ########### Screen 3: State and Census Level Information ###########
@@ -194,6 +199,7 @@ def climate_viz():
             #Create data table for top five states receiving federal funding
             top5_funding = top_funding[top_funding['state'] == state]
             top_5_assistance = top5_funding.sort_values(by='fed_amount', ascending=False).head(5)
+            top_5_assistance.drop(['disasterNumber'], axis=1)
 
             top_5_assistance_table = top_5_assistance.to_dict('records')
 
@@ -206,8 +212,6 @@ def climate_viz():
             fig5 = px.bar(data_frame=top10_unemployed, x = 'name_county', y = 'percent_unemployed',
                             color_discrete_sequence = ['#FF6B35'])
             fig5.update_layout(title= f"Comparison of Unemployment Rate in Counties to {state_name} and National Average")
-    
-
 
             top10_income = get_top_10_counties(click_data, state_name, 'median_household_income', 'median_household_income_state', 'median_household_income_us', True)
             fig6 = px.bar(data_frame=top10_income, x = 'name_county', y = 'median_household_income',
@@ -238,9 +242,19 @@ def climate_viz():
     #################### Layout ######################
 
     # Text
-    header = html.H4("Analysis of Weather-related Disasters in the United States",
+    header = html.H4("Investigating Patterns ofClimate-related Natural Disasters in the United States",
                 className="bg-primary text-white p-3 mb-2 text-center")
-
+    
+    subheader = html.H5(
+                "Jackie Glasheen, Jen Yeaton, Harsh Pachisia, Shwetha Srinivasan",
+                className="p-2 mb-2 text-center",
+                style={"font-size": "20px"})
+    
+    date = html.H5(
+                "March 2023",
+                className="p-2 mb-2 text-center",
+                style={"font-size": "10px"})
+    
     intro_text = html.Div(
         [
         html.P([html.Strong("42.63 %"), " of natural "
@@ -278,11 +292,79 @@ def climate_viz():
     className="my-4",
     style={"color": "black", "font-family": "Garamond", "font-size": "20px"}
     )
-
-    # maps_text = 
-
-    # bubble_map_text = 
+    bar_text = html.Div(
+        [
+        html.P(["The number of disaster events is steadily increasing over time. "
+        "2011 stands out as the ", html.A("“Year of Natural Disasters”", 
+        href="https://www.livescience.com/17769-2011-record-natural-disasters-infographic.html#:~:text=The%20United%20States%20was%20hit,climate%20change%20is%20a%20contributor."),
+        " breaking the record for costly, weather-related disasters, including "
+        "drought, wildfire, tornados, flooding, a blizzard, and a hurricane, "
+        "all as a result of climate change."]),
+        ],
+    className="my-4",
+    style={"color": "black", "font-family": "Garamond", "font-size": "20px"}
+    )
     
+    
+
+    maps_text = html.Div(
+        [
+        html.P("Choose between the number of disaster events or the public "
+        "assistance provided for disaster management to see how their patterns "
+        "have changed between 2000-2022. In general, we see that California, "
+        "Texas, and Florida face the most amount of disasters. Click on a state "
+        "to get granular state and county-level information!" 
+        ),
+        ],
+    className="my-4",
+    style={"color": "black", "font-family": "Garamond", "font-size": "20px"}
+    )
+
+    bubble_map_text = html.Div(
+        [
+        html.P("Press play to see the relationship between the number of disaster "
+        "events, and the amount of public assistance provided, relative to the "
+        "size of the state’s population. Certain states even with smaller populations "
+        "and fewer disasters get a lot more funding as compared to others." 
+        ),
+        ],
+    className="my-4",
+    style={"color": "black", "font-family": "Garamond", "font-size": "20px"}
+    )
+
+    state_text = html.Div(
+        [
+        html.P(["See how your state compares to others in being in a declared disaster "
+        "scenario. On average, a state is in a situation where a disaster has been "
+        "declared 15 days a year between 2000-2022.  The Federated States of Micronesia "
+        "(FM) stands out as an outlier since it is located in the Pacific Ring "
+        "of Fire and is prone to ", html.A("disasters", href="https://www.undrr.org/media/81878/download#:~:text=FSM%20is%20located%20in%20the,claim%20people's%20lives%20and%20livestock."), 
+        ]),
+        html.P(["The Inflation Reduction Act of 2022 calls for investment in "
+        "domestic clean energy production and aims to substantially reduce carbon "
+        "emissions. However, we found that senators who voted for the bill were "
+        "not necessarily disproportionately impacted by disasters, but rather "
+        "the vote was along party lines." 
+        ]),
+        ],
+    className="my-4",
+    style={"color": "black", "font-family": "Garamond", "font-size": "20px"}
+    )
+
+    table_text = html.Div(
+        [
+        html.P(["The table to the left lists the top 5 disasters, and the type "
+        "of disaster, over the time period 2000-2022.", 
+        ]),
+        html.P(["The table to the right lists the top 5 disasters based on public "
+        "assistance funding received from FEMA, and the type "
+        "of disaster, over the time period 2000-2022." 
+        ]),
+        ],
+    className="my-4",
+    style={"color": "black", "font-family": "Garamond", "font-size": "20px"}
+    )
+     
     census_text = html.Div(
         [
         html.P(" At the county level, we can see in greater detail some information"
@@ -291,14 +373,37 @@ def climate_viz():
             " (such as lack of health insurance and unemployment) that would make"
             " dealing with weather-related disasters especially challenging for "
             " these populations. In the bar charts below, clockwise, we show the"
-            " racial breakdown of each state compared to the United States as a whole,"
             " the ten counties with the highest rates of unemployment, the ten counties"
             " with the lowest household income levels, and the ten counties with the"
-            " greatest percent of the population without health insurance."),
+            " greatest percent of the population without health insurance and the "
+            "ten counties with the lowest rates of higher education."),
         ],
     className="my-4",
     style={"color": "black", "font-family": "Garamond", "font-size": "20px"}
     )
+
+    conclusion_text = html.Div(
+        [
+        html.P("This dashboard highlights the overall increase in climate disasters "
+        "by showing their trend, breaking down that trend by geography, disaster "
+        "type, and FEMA spending, and further listing the top 5 events by state. "
+        "In addition, we presented this data alongside information about how the "
+        "senators in a state voted on the recent federal climate legislation and "
+        "relevant demographic information for the various states and counties. "
+        "To build upon this work, further analytical connections between climate "
+        "disasters and other data sources should be considered. For example, are "
+        "racial minorities disproportionately affected by climate disasters?  "
+        "Moreover, some adjustments to the data may be necessary. For instance, "
+        "the FEMA money granted as a result of climate disasters should be "
+        "inflation-adjusted. Finally, more investigation is required to understand "
+        "the relationship between some of the disaster types used in the FEMA data "
+        "and global warming, and whether certain disaster types have been used "
+        "consistently over time in the data."),
+        ],
+    className="my-4",
+    style={"color": "black", "font-family": "Garamond", "font-size": "20px"}
+    )
+
 
 
     # https://cdn.5280.com/2022/10/00-Denver-Voting-Guide.jpg
@@ -332,38 +437,44 @@ def climate_viz():
             className="mb-4",)
 
     # Checklist
-    checklist = html.Div(
-            [dbc.Label("Select a disaster type"),
-            dbc.Checklist(
-            id = "checklist",
-            options=[{"label": i, "value": i} for i in disaster_types],
-            value = [],
-            inline = True,),],
-            className="mb-4",)
+    # checklist = html.Div(
+    #         [dbc.Label("Select a disaster type"),
+    #         dbc.Checklist(
+    #         id = "checklist",
+    #         options=[{"label": i, "value": i} for i in disaster_types],
+    #         value = [],
+    #         inline = True,),],
+    #         className="mb-4",)
 
-    selec_input = dbc.Card([dropdown, checklist], body=True)
+    selec_input = dbc.Card([dropdown], body=True)
 
     app.layout = dbc.Container(
         [
             header,
+            subheader,
+            date,
             intro_text,
+            bar_text,
             dbc.Row([
                 dbc.Col([
-                    dcc.Graph(id='stacked-bar-chart', figure=fig1, style={"height":"500px"}),
+                    dcc.Graph(id='stacked-bar-chart', figure=fig1, style={"height":"600px"}),
                 ], width={'size': 12, 'offset': 0, 'order': 1}),
                 # dbc.Col(first_card, width={'size': 4, 'offset': 0, 'order': 1}),
             ]),
+            maps_text,
             dbc.Row([
                 dbc.Col([
                     dcc.Graph(id='choropleth-map')
                 ], width={'size': 9, 'offset': 0, 'order': 1}),
                 dbc.Col([selec_input], width=3)
             ]),
+            bubble_map_text,
             dbc.Row([
                 dbc.Col([
-                    dcc.Graph(id='scatter-bubble', figure=fig3, style={"height":"500px"})
+                    dcc.Graph(id='scatter-bubble', figure=fig3, style={"height":"600px"})
                 ], width={'size': 12, 'offset': 0, 'order': 1}),
             ]),
+            state_text,
             dbc.Row([
                 dbc.Col([
                     dcc.Graph(id='bar-chart')
@@ -374,9 +485,10 @@ def climate_viz():
                 # dbc.Col(vote_yes, width={'size': 3, 'offset': 0, 'order': 2}),
                 # dbc.Col(vote_no, width={'size': 3, 'offset': 0, 'order': 3})
             ]),
+            table_text,
             dbc.Row([
-                dbc.Col(table, md=6),
-                dbc.Col(funding_table, md=6),
+                dbc.Col([dbc.Label('Top 5 Disaster Events'), table], md=6),
+                dbc.Col([dbc.Label("Top 5 Disaster Events by FEMA Public Assistance"), funding_table], md=6),
             ]),
             census_text,
             dbc.Row([
@@ -394,7 +506,8 @@ def climate_viz():
                 dbc.Col([
                     dcc.Graph(id='education-bar')
                 ], width={'size': 6, 'offset': 0, 'order': 2}),
-            ])
+            ]),
+            conclusion_text
         ],
         fluid = True,
         className = "dbc",)
