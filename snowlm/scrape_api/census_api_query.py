@@ -91,13 +91,9 @@ def api_query():
     response_county = requests.get(query_url_county)
     response_state = requests.get(query_url_state)
     response_us = requests.get(query_url_us)
-
     census_json_county = response_county.json()
     census_json_state = response_state.json()
     census_json_us = response_us.json()
-    #print(census_json_count)
-    #print(census_json_state)
-    #print(census_json_us)
 
     #Create cleaned and merged pandas dataframe from the three above json files:
     full_census_df = sep_jsons_to_merged_cleaned_dataframes(census_json_county, 
@@ -140,17 +136,6 @@ def sep_jsons_to_merged_cleaned_dataframes(census_json_county, census_json_state
     census_df_county = pd.DataFrame(columns = column_names_county, data = census_json_county[1:])
     census_df_state = pd.DataFrame(columns = column_names_state, data = census_json_state[1:])
     census_df_us = pd.DataFrame(columns = column_names_us, data = census_json_us[1:])
-    print("census_df_county: ", census_df_county.head)
-    print("census_df_state: ", census_df_state.head)
-    print("census_df_us: ", census_df_us.head)
-
-    #REMOVE DIRECTLY BELOW - JUST FOR CHECKING
-    result1 = census_df_county.dtypes
-    result2 = census_df_state.dtypes
-    result3 = census_df_us.dtypes
-    print(result1)
-    print(result2)
-    print(result3)
 
     #Checking variable types and making any revisions necessary to census_df_county:
     clean_census_df_county = clean_county_level_census_data(census_df_county)
@@ -159,25 +144,13 @@ def sep_jsons_to_merged_cleaned_dataframes(census_json_county, census_json_state
     clean_census_df_state = clean_state_level_census_data(census_df_state)
 
     #Checking variable types and making any revisions necessary to census_df_us:
-    clean_census_df_county = clean_us_level_census_data(census_df_us)
+    clean_census_df_us = clean_us_level_census_data(census_df_us)
 
     #Citation for loading in data and changing its types: https://www.youtube.com/watch?v=l47HptzM7ao
 
-    #REMOVE THESE CHECKS LATER:
-    result1 = census_df_county.dtypes
-    result2 = census_df_state.dtypes
-    result3 = census_df_us.dtypes
-    print(result1)
-    print(result2)
-    print(result3)
-
     #Combine census_df_county, census_df_state, and census_df_us into full_census_df
-    census_df_stateANDus = census_df_state.merge(census_df_us, how = "outer", on = "country_code")
-    full_census_df = census_df_county.merge(census_df_stateANDus, how = "outer", on = "state_code")
-
-    #REMOVE THESE CHECKS:
-    #pd.set_option('display.max_columns', None)
-    #full_census_df.head
+    census_df_stateANDus = clean_census_df_state.merge(clean_census_df_us, how = "outer", on = "country_code")
+    full_census_df = clean_census_df_county.merge(census_df_stateANDus, how = "outer", on = "state_code")
 
     #return census_df_county, census_df_state, census_df_us
     return full_census_df
@@ -211,7 +184,20 @@ def clean_county_level_census_data(census_df_county):
     #Add a variable to census_df_county that is a concatenation of the state code and the county code:
     census_df_county["state_and_county_code"] = census_df_county["state_code"] + census_df_county["county_code"]
 
-    return census_df_county
+    #Add a variable to census_df_county that is an alphabetic code for states (e.g., IL, NJ, WI)
+    #(The code in the next 4 lines is a revised version of code written by Jackie Glasheen 
+    #for another dataset in this project)
+    file_path = "snowlm/data/Census_State_codes.txt"
+    state_code_alpha_and_numeric = pd.read_csv(file_path, sep='|')
+    state_code_alpha_and_numeric = state_code_alpha_and_numeric.drop(columns
+        =['STATE_NAME','STATENS'])
+    state_code_alpha_and_numeric = state_code_alpha_and_numeric.rename(columns
+        ={"STATE": "state_code", "STUSAB": "state_code_alpha"})
+    census_df_county["state_code"] = census_df_county["state_code"].astype(int)
+    census_df_county_w_statecodes = pd.merge(census_df_county, 
+        state_code_alpha_and_numeric, how = "left", on = "state_code")
+
+    return census_df_county_w_statecodes
 
 
 
@@ -233,6 +219,7 @@ def clean_state_level_census_data(census_df_state):
     census_df_state["without_healthcare_coverage_state"] = census_df_state["without_healthcare_coverage_state"].astype(float)
     census_df_state["bach_or_higher_state"] = census_df_state["bach_or_higher_state"].astype(float)
     census_df_state["country_code"] = 1
+    census_df_state["state_code"] = census_df_state["state_code"].astype(int)
 
     return census_df_state
 
