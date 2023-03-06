@@ -3,12 +3,13 @@ Severe Climate Events: Disaster Declaration for states and counties
 Exploratory Data Analysis by Harsh Vardhan Pachisia
 '''
 import pandas as pd
+pd.options.mode.chained_assignment = None
 
 disasters_raw = pd.read_csv("snowlm/data/disaster_declarations.csv")
 
 ##Understanding the raw data
-print(disasters_raw.head())
-print(disasters_raw.info())
+disasters_raw.head()
+disasters_raw.info()
 
 # keeping only the possibly relevant columns
 disasters = disasters_raw[[
