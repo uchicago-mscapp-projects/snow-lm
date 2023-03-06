@@ -93,8 +93,21 @@ def climate_viz():
                             columns=[{'name': col, 'id': col} for col in top_5_funding.columns],
                             data=top_5_funding.to_dict('records'),)
 
+    # Function for calculating top 10 worst counties for an indicator
+
+    def get_top_10_counties(df, state, col_name, col_name_state, col_name_us, bool_val):
+        top_10 = df.sort_values(by=col_name, ascending=bool_val).head(10)
+        top10_df = top_10[['name_county', col_name]]
+        state_data = {'name_county': f'{state}', col_name : top_10[col_name_state].iloc[0]}
+        national_data = {'name_county': 'United States', col_name : top_10[col_name_us].iloc[0]}
+        final_df = top10_df.append([state_data, national_data], ignore_index=True)
+
+        return final_df
+
     @app.callback(
-        [Output('bar-chart', 'figure'), Output('table', 'data'), Output('funding-table', 'data')],
+        [Output('bar-chart', 'figure'), Output('table', 'data'), 
+        Output('funding-table', 'data'), Output('unemployed-bar', 'figure'),
+        Output('income-bar', 'figure'), Output('insurance-bar', 'figure')],
         [Input('choropleth-map', 'clickData')]
     )
 
@@ -128,16 +141,19 @@ def climate_viz():
 
             # Create visuals for county level information from each state
             df_census = api_query()
-
             click_data = df_census[df_census['state_code_alpha'] == state]
 
+            top10_unemployed = get_top_10_counties(click_data, state, 'percent_unemployed', 'percent_unemployed_state', 'percent_unemployed_us', False)
+            fig5 = px.bar(data_frame=top10_unemployed, x = 'name_county', y = 'percent_unemployed')
 
-            # fig5 = px.bar(data_frame=click_data, x= ['name_county', 'name_state', 'name_country'], 
-                            # y=['percent_unemployed', 'percent_unemployed_state', 'percent_unemployed_country'])
 
-            # fig5
+            top10_income = get_top_10_counties(click_data, state, 'median_household_income', 'median_household_income_state', 'median_household_income_us', True)
+            fig6 = px.bar(data_frame=top10_income, x = 'name_county', y = 'median_household_income')
 
-            return fig4, top_5_table, top_5_assistance_table
+            top10_noinsurance = get_top_10_counties(click_data, state, 'without_healthcare_coverage', 'without_healthcare_coverage_state', 'without_healthcare_coverage_us', False)
+            fig7 = px.bar(data_frame=top10_noinsurance, x = 'name_county', y = 'without_healthcare_coverage')
+
+            return fig4, top_5_table, top_5_assistance_table, fig5, fig6, fig7
         else:
             return {}
 
@@ -190,32 +206,47 @@ def climate_viz():
         [
             header,
             dbc.Row([
-                    dbc.Col([
-                        dcc.Graph(id='stacked-bar-chart', figure=fig1)
-                    ], width={'size': 6, 'offset': 0, 'order': 2}),
-                    dbc.Col(first_card, width={'size': 4, 'offset': 0, 'order': 1}),
-                ]),
-                dbc.Row([
-                    dbc.Col([
-                        dcc.Graph(id='choropleth-map')
-                    ], width={'size': 9, 'offset': 0, 'order': 1}),
-                    dbc.Col([selec_input], width=3)
-                ]),
-                dbc.Row([
-                    dbc.Col([
-                        dcc.Graph(id='scatter-bubble', figure=fig3)
-                    ], width={'size': 6, 'offset': 0, 'order': 2}),
-                    dbc.Col([
-                        dcc.Graph(id='bar-chart')
-                    ], width={'size': 6, 'offset': 0, 'order': 2}),
-                ]),
-                dbc.Row([
-                    dbc.Col(table, md=6),
-                    dbc.Col(funding_table, md=6),
-                ])
-            ],
-            fluid = True,
-            className = "dbc",)
+                dbc.Col([
+                    dcc.Graph(id='stacked-bar-chart', figure=fig1)
+                ], width={'size': 12, 'offset': 0, 'order': 1}),
+                # dbc.Col(first_card, width={'size': 4, 'offset': 0, 'order': 1}),
+            ]),
+            dbc.Row([
+                dbc.Col([
+                    dcc.Graph(id='choropleth-map')
+                ], width={'size': 9, 'offset': 0, 'order': 1}),
+                dbc.Col([selec_input], width=3)
+            ]),
+            dbc.Row([
+                dbc.Col([
+                    dcc.Graph(id='scatter-bubble', figure=fig3)
+                ], width={'size': 12, 'offset': 0, 'order': 2}),
+            ]),
+            dbc.Row([
+                dbc.Col([
+                    dcc.Graph(id='bar-chart')
+                ], width={'size': 6, 'offset': 0, 'order': 2}),
+            ]),
+            dbc.Row([
+                dbc.Col(table, md=6),
+                dbc.Col(funding_table, md=6),
+            ]),
+            dbc.Row([
+                dbc.Col([
+                    dcc.Graph(id='unemployed-bar')
+                ], width={'size': 6, 'offset': 0, 'order': 2}),
+                dbc.Col([
+                    dcc.Graph(id='income-bar')
+                ], width={'size': 6, 'offset': 0, 'order': 2}),
+            ]), 
+            dbc.Row([
+                dbc.Col([
+                    dcc.Graph(id='insurance-bar')
+                ], width={'size': 6, 'offset': 0, 'order': 2}),
+            ])
+        ],
+        fluid = True,
+        className = "dbc",)
 
     app.run_server(host = "127.0.0.1", port =8055, debug=False)
 # if __name__ == '__main__':

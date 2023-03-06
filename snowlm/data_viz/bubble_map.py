@@ -52,14 +52,32 @@ climate_df = get_cleaned_data ("snowlm/data/disaster_declarations.csv", only_200
 # fig1 = px.bar(x = states, y = values)
 # fig1.show()
 
-num_days_in_disaster = {"states": number_of_days_in_dec_disaster(climate_df).keys(),
-    "values": number_of_days_in_dec_disaster(climate_df).values()}
-disaster_days = pd.DataFrame.from_dict(num_days_in_disaster)
+# num_days_in_disaster = {"states": number_of_days_in_dec_disaster(climate_df).keys(),
+#     "values": number_of_days_in_dec_disaster(climate_df).values()}
+# disaster_days = pd.DataFrame.from_dict(num_days_in_disaster)
 
-fig4 = px.bar(disaster_days, x = "states", y = "values")
-highlight_values = ["TX", 'National Average']
-highlight_color = ['green']
-fig4.update_traces(marker=dict(color=[highlight_color if x in highlight_values else 'blue' for x in disaster_days["states"]]))
+# fig4 = px.bar(disaster_days, x = "states", y = "values")
+# highlight_values = ["TX", 'National Average']
+# highlight_color = ['green']
+# fig4.update_traces(marker=dict(color=[highlight_color if x in highlight_values else 'blue' for x in disaster_days["states"]]))
 
 
-fig4.show()
+# fig4.show()
+
+# df_census = api_query()
+# click_data = df_census[df_census['state_code_alpha'] == state]
+# get_top_10_counties(df, col_name, col_name_state, col_name_us):
+#     top_10 = click_data.sort_values(by=col_name, ascending=False).head(10)
+#     top10_df = top_10[['name_county', col_name]]
+#     state_data = {'name_county': f'{state}', col_name : top_10[col_name_state].iloc[0]}
+#     national_data = {'name_county': 'United States', col_name : top_10[col_name_us].iloc[0]}
+#     final_df = top10_df.append([state_data, national_data], ignore_index=True)
+
+
+# top10_unemployed = click_data.sort_values(by='percent_unemployed', ascending=False).head(10)
+
+
+# fig5 = px.bar(data_frame=click_data, x= ['name_county', 'TX', 'United States'], 
+#                 y=['percent_unemployed', 'percent_unemployed_state', 'percent_unemployed_country'])
+
+# fig5.show()
