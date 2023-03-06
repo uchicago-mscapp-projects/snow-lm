@@ -4,13 +4,7 @@ Final Project for CAPP122
 
 ### Team
 
-Jackie Glasheen: jglasheen
-
-Harsh Vardhan Pachisia: harshpachisia
-
-Shwetha Srinivasan: shwetha
-
-Jennifer Yeaton: jkyeaton
+Jackie Glasheen, Harsh Vardhan Pachisia, Shwetha Srinivasan, and Jennifer Yeaton
 
 ### Description
 
@@ -24,6 +18,10 @@ This dashboard was built using Python and Dash, using [climate disaster](https:/
 
 Using Poetry
 1. Make the clone of the project repository
+ '''python
+ cd 30122-project-snow-lm
+
+ '''
 
 2. Go to the project directory: 
 '''
@@ -33,6 +31,7 @@ cd 30122-project-snow-lm
 3. From the directory install virtual environment and dependencies: poetry install
 Activate the virtual environment: $poetry shell$
 Run the project:
-For running the dashboard: python3 -m snowlm dashboard
+For running the dashboard: python3 -m snowlm
+
 ### Example Insights (Add charts and screenshots of graphics). 
 - 
