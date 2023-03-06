@@ -18,7 +18,7 @@ This dashboard was built using Python and Dash, using [climate disaster](https:/
 
 This project can be run using Poetry. The steps are outlined below.
 
-1. Make the clone of the project repository
+1. Make a clone of the project repository
 
 2. Go to the project directory: `cd 30122-project-snow-lm`
 
