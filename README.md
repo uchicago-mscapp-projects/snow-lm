@@ -16,22 +16,19 @@ This dashboard was built using Python and Dash, using [climate disaster](https:/
 
 ### Runing the project
 
-Using Poetry
+This project can be run using Poetry. The steps are outlined below.
+
 1. Make the clone of the project repository
- '''python
- cd 30122-project-snow-lm
 
- '''
+2. Go to the project directory: `cd 30122-project-snow-lm`
 
-2. Go to the project directory: 
-'''
-cd 30122-project-snow-lm 
-'''
+3. From the directory install virtual environment and dependencies: `poetry install`
 
-3. From the directory install virtual environment and dependencies: poetry install
-Activate the virtual environment: $poetry shell$
-Run the project:
-For running the dashboard: python3 -m snowlm
+4. Activate the virtual environment: `poetry shell`
+
+5. Run the project: `python3 -m snowlm`
+
+It will ask you to open the dash application in the browser to see the interactive dashboard. 
 
 ### Example Insights (Add charts and screenshots of graphics). 
 - 
