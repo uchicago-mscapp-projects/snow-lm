@@ -1,6 +1,6 @@
 '''
 Severe Climate Events: Disaster Declaration for states and counties
-Exploratory Data Analysis by Harsh Vardhan Pachisia
+Exploratory Data Analysis by @Harsh Vardhan Pachisia
 '''
 import pandas as pd
 pd.options.mode.chained_assignment = None
@@ -51,8 +51,8 @@ climate_disasters = disasters.loc[
     disasters['incidentType'].isin(climate_disasters_list)]
 
 #Checking for state-wide disasters that can be removed
-#  if they are already covered by a county, to ensure that county codes of 0
-#  are not kept in the dataset. 
+# if they are already covered by a county, to ensure that county codes of 0
+# are not kept in the dataset. 
 state_wide_disasters = disasters.loc[disasters["designatedArea"] == "Statewide"]
 
 #### Subsetting the data to the last 23 years (2000-2022). 
@@ -68,9 +68,10 @@ climate_last_23 = climate_disasters.loc[(climate_disasters['Year'] >= '2000')
 climate_last_23.head()
 
 #If we take all years- we have 52,445 counties that have been affected
-#  by climate-related disasters.
-#  If we take from 2000 onwards (2000-2022 included),
-#  we get 36,340 counties that have been affected by climate-related disasters. 
+# by climate-related disasters.
+# If we take from 2000 onwards (2000-2022 included),
+# we get 36,340 counties that have been affected by climate-related disasters.
+ 
 #Renaming climate columns
 climate_last_23.columns = ['record_id', 'disaster_number', 'state', 'state_code',
                           'county_code','place_code','dec_date', 'fiscal_year',
@@ -90,8 +91,9 @@ climate_last_23.pa_program.value_counts()/total_number_of_counties_affected
 #Individual and Households: 81.71%
 #Individual Assistance: 86.46%
 #Public Assistance: 94.13%
+
 #Keeping only Public assistance column as it has the highest coverage
-#  in our dataset, is the largest program under FEMA, and hence, 
+# in our dataset, is the largest program under FEMA, and hence, 
 # has the largest economic impact. 
 
 climate_last_23 = climate_last_23.drop(columns=[

@@ -28,4 +28,6 @@ This project can be run using Poetry. The steps are outlined below.
 
 5. Run the project: `python3 -m snowlm`
 
-It will ask you to open the dash application in the browser to see the interactive dashboard. 
+It will ask you to open the dash application in the browser to see the interactive dashboard.
+
+Pressing Control+C in your terminal will close the application. 
