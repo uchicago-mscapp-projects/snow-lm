@@ -12,6 +12,7 @@ https://www.census.gov/data/developers/data-sets/acs-5year.html
 import pathlib
 import pandas as pd
 import requests
+import os
 
 def api_query():
     '''
