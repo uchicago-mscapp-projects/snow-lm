@@ -1,7 +1,6 @@
 import dash
 import dash_bootstrap_components as dbc
 from dash import Dash, html, dcc, dash_table
-from dash_bootstrap_templates import load_figure_template
 from dash.dependencies import Input, Output
 import plotly.graph_objects as go
 import plotly.express as px
@@ -95,7 +94,7 @@ def climate_viz():
                     columns=[{'name': col, 'id': col} for col in top_disasters.columns],
                     data=top_disasters.to_dict('records'),)
 
-    # Top 5 Federal Assistance Table
+    # Top 5 FEMA Assistance Table
     df_econ_impact = clean_disaster_summaries("snowlm/data/PublicAssistanceFundedProjectsSummaries.csv", "snowlm/data/disaster_declarations.csv" )
     top_funding = top_5_by_public_assistance(df_econ_impact)
     top_5_funding = top_funding.sort_values(by='fed_amount', ascending=False).head(5)
@@ -234,7 +233,7 @@ def climate_viz():
     
     intro_text = html.Div(
         [
-        html.P([html.Strong("42.63 %"), " of natural "
+        html.P([html.Strong("42.63%"), " of natural "
         "disasters in the United States since 1980" 
         " have taken place over the last 12 years. It is evident that climate "
         "change and global warming are causing extreme weather disasters to "
@@ -491,163 +490,3 @@ def climate_viz():
         className = "dbc",)
 
     app.run_server(host = "127.0.0.1", port =8055, debug=False)
-# if __name__ == '__main__':
-#     app.run_server(debug=False, port=8055)
-
-
-
-
-#     dbc.Row([
-#         dbc.Col([
-#             dcc.Graph(id='chart-1', figure=fig1
-#         ], width={'size': 6, 'offset': 0, 'order': 2}),
-#         dbc.Col((html.Div(
-#         [html.H4("42.63%", className="display-6"),
-#          html.Hr(className="my-2"),
-#          html.P(
-#               "Disasters are increasing, over 42.63% of them took place since "
-#               "2010 (when looking at a dataset from 1980-2010) "),],
-#            className = "h-100 p-5 text-white bg-dark rounded-3",), 
-#          md=12,), width={'size': 6, 'offset': 0, 'order': 1})
-#     ]),
-#     dbc.Row([
-#         dbc.Col([
-#             dcc.Graph(id='chart-3', figure=fig2
-#         ], width={'size': 6, 'offset': 0, 'order': 1}),
-#     ])
-# ])
-
-
-# app.layout = dbc.Container(
-#        [
-#            header,
-#            dbc.Row([
-#                 dbc.Col([
-#                     dcc.Graph(id='chart-1', figure=fig1
-#                 ], width={'size': 6, 'offset': 0, 'order': 2}),
-#                 dbc.Col((html.Div(
-#                 [html.H4("42.63%", className="display-6"),
-#                 html.Hr(className="my-2"),
-#                 html.P(
-#                     "Disasters are increasing, over 42.63% of them took place since "
-#                     "2010 (when looking at a dataset from 1980-2010) "),],
-#                 className = "h-100 p-5 text-white bg-dark rounded-3",), 
-#                 md=12,), width={'size': 6, 'offset': 0, 'order': 1})
-#             ]),
-#              dbc.Row([
-#                 dbc.Col([
-#                     dcc.Graph(id='chart-2', figure=fig2
-#                 ], width={'size': 6, 'offset': 0, 'order': 1}),
-#                 dbc.Col([selec_input], width =4),
-#             ])
-#         ],
-#         fluid = True,
-#         className = "dbc",)
-
-# app.layout = dbc.Container(
-#        [
-#            header,
-#            dbc.Row(
-#                [dbc.Col([selec_input], width =4),
-#                 dbc.Col([charts],      width =8),],),
-#         ],
-#         fluid = True,
-#         className = "dbc",)
-
-
-
-# Slider
-
-# years  = df.year.unique()
-# years  = np.sort(years)
-
-# slider = html.Div(
-#         [dbc.Label("Select a year"),
-#          dcc.RangeSlider(
-#            id  = "years",
-#            min = years[0],
-#            max = years[-1],
-#            tooltip={"placement": "bottom", "always_visible": True},
-#            value=[years[0], years[-1]],),],
-#          className="mb-4",)
-
-
-# dbc.Col(html.Div(
-#                     [html.H4("42.63%", className="display-6"),
-#                     html.Hr(className="my-2"),
-#                     html.P(
-#                         "Disasters are increasing, over 42.63% of them took place since "
-#                         "2010 (when looking at a dataset from 1980-2010) "),],
-#                     className = "h-100 p-3 text-white bg-dark rounded-3",), width={'size': 6, 'offset': 0, 'order': 1}),
-
-# Jumbotron
-# jumbotron = dbc.Col(html.Div(
-#         [html.H4("42.63%", className="display-6"),
-#          html.Hr(className="my-2"),
-#          html.P(
-#               "Disasters are increasing, over 42.63% of them took place since "
-#               "2010 (when looking at a dataset from 1980-2010) "),],
-#            className = "h-100 p-5 text-white bg-dark rounded-3",), 
-#          md=12,)
-
-    #     vote_yes = dbc.Card(
-    #     [
-    #         dbc.CardImg(src="https://cdn-icons-png.flaticon.com/512/7444/7444409.png", top=True),
-    #         dbc.CardBody(
-    #             [
-    #                 html.H4("Vote Yes", className="card-title"),
-    #                 html.P(str(yes_vote),
-    #                     className="card-text",
-    #                 ),
-    #             ]
-    #         ),
-    #     ],
-    #     id='vote-yes',
-    #     style={"width": "18rem"},
-    #     )
-
-    #     vote_no = dbc.Card(
-    #         [
-    #             dbc.CardImg(src="https://cdn-icons-png.flaticon.com/512/7444/7444427.png", top=True),
-    #             dbc.CardBody(
-    #                 [
-    #                     html.H4("Vote No", className="card-title"),
-    #                     html.P(str(voting_behavior()[1]),
-    #                         className="card-text",
-    #                     ),
-    #                 ]
-    #             ),
-    #         ],
-    #         id='vote-no',
-    #         style={"width": "18rem"},
-    #         )
-        
-    #     return vote_yes, vote_no
-
-       # Checklist
-    # checklist = html.Div(
-    #         [dbc.Label("Select a disaster type"),
-    #         dbc.Checklist(
-    #         id = "checklist",
-    #         options=[{"label": i, "value": i} for i in disaster_types],
-    #         value = [],
-    #         inline = True,),],
-    #         className="mb-4",)
-
-
-
-
-    # https://cdn.5280.com/2022/10/00-Denver-Voting-Guide.jpg
-    # https://cdn-icons-png.flaticon.com/512/7444/7444409.png
-    # https://cdn-icons-png.flaticon.com/512/7444/7444427.png
-
-    # first_card = dbc.Card(
-    #     dbc.CardBody(
-    #         [
-    #             html.H5("42.63%", className="card-title"),
-    #             html.P("Disasters are increasing, over 42.63% of them took place since "
-    #                     "2010 (when looking at a dataset from 1980-2022)"),
-    #             # dbc.Button("Go somewhere", color="primary"),
-    #         ]
-    #     )
-    # )
