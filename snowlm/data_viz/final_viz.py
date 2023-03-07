@@ -13,8 +13,6 @@ https://towardsdatascience.com/creating-an-interactive-dashboard-with-dash-plotl
 The above mentioned sources have been generally useful as a guide to develop the interactive
 dashboard and visualizations for this project. 
 """
-
-
 import dash
 import dash_bootstrap_components as dbc
 from dash import Dash, html, dcc, dash_table
@@ -173,7 +171,7 @@ def climate_viz():
     table = dash_table.DataTable(
         id="table",
         columns=[{"name": col, "id": col} for col in top_disasters.columns],
-        data=top_disasters.to_dict("disasters"),
+        data=top_disasters.to_dict("records"),
     )
 
     # Top 5 FEMA Assistance Table
@@ -189,13 +187,13 @@ def climate_viz():
     funding_table = dash_table.DataTable(
         id="funding-table",
         columns=[{"name": col, "id": col} for col in top_5_funding.columns],
-        data=top_5_funding.to_dict("fema"),
+        data=top_5_funding.to_dict("records"),
     )
 
     # Function for calculating top 10 worst counties for an indicator
 
     def get_top_10_counties(df, state, col_name, col_name_state, col_name_us, bool_val):
-        '''
+        """
         Returns the top 10 worst counties for a specific census indicator
         Inputs:
             df (DataFrame): a census dataset
@@ -207,7 +205,7 @@ def climate_viz():
             bool_val (boolean): True or False depending on whether the column
                 should be sorted ascending
         Returns (DataFrame): The top 10 worst counties for chosen indicator
-        '''
+        """
         top_10 = df.sort_values(by=col_name, ascending=bool_val).head(10)
         top10_df = top_10[["name_county", col_name]]
         state_data = {
@@ -224,15 +222,15 @@ def climate_viz():
 
     ######## Voting Card #############
     def voting_card(state):
-        '''
+        """
         Calculates the number for senators that voted yes or no
         for the IRA (Climate Bill) legistation
 
         Inputs
             state (str): state selected when interacting with the map
-        
+
         Returns (tuple): Number of yes and no votes for the bill for the state
-        '''
+        """
         voting_data = scrape_voting_behavior()
         voting_data["state"] = voting_data.index
 
@@ -294,11 +292,11 @@ def climate_viz():
 
             # Create data table for top five disaster events for each state
             top_5 = top_disasters[top_disasters["state"] == state]
-            top_5_table = top_5.to_dict("disasters")
+            top_5_table = top_5.to_dict("records")
 
             # Create data table for top five states receiving federal funding
             top_5_assistance = top_5_funding[top_5_funding["state"] == state]
-            top_5_assistance_table = top_5_assistance.to_dict("fema")
+            top_5_assistance_table = top_5_assistance.to_dict("records")
 
             # Create visuals for county level information from each state
             df_census = api_query()
@@ -657,7 +655,6 @@ def climate_viz():
         className="my-4",
         style={"color": "black", "font-family": "Garamond", "font-size": "15px"},
     )
-
 
     ################ Final App Layout ###################
 
