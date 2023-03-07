@@ -35,12 +35,10 @@ def get_climate_econ_data(only_2000_onwards):
 
     if only_2000_onwards:
         disaster_events_by_state = number_of_disaster_events_by_state(
-            get_cleaned_data("snowlm/data/disaster_declarations.csv",
-                             only2000onwards=True))
+            get_cleaned_data("snowlm/data/disaster_declarations.csv",True))
     else:
         disaster_events_by_state = number_of_disaster_events_by_state(
-            get_cleaned_data("snowlm/data/disaster_declarations.csv",
-                             only_2000_onwards=False))
+            get_cleaned_data("snowlm/data/disaster_declarations.csv",False))
     
     climate_econ_data = disaster_events_by_state.merge(
         FEMA_obli_by_yr_state_disastertype, how='left', 
