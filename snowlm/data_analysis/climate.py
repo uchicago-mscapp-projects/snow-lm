@@ -40,7 +40,7 @@ def get_cleaned_data(raw_data_path,only_2000_onwards):
     disaster_type_list = disasters.disaster_type.unique().tolist()
 
     #removing non-climate related disasters or climate disasters that are 
-    #repeated (check Jupyter Notebook for further details)
+    #repeated (check climate_eda.py for further details)
     unwanted_disasters = ['Biological','Toxic Substances','Chemical',
                           'Terrorist','Human Cause','Fishing Losses',
                             'Severe Storm(s)']
