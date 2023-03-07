@@ -75,7 +75,7 @@ def api_query():
     geo_us = "&for=us:*"
 
     #7. Add census API key for this project:
-    census_api_key = "&key=dbaf6b8c0aa053d4df5ae844bba98940952fc50b"
+    census_api_key = "&key=" + os.environ["CENSUS_API_KEY"]
 
     #8. Create f strings
     query_url_county = f"{host_name}{data_year}{dataset_name_acronym}{get}{list_of_vars_county}{geo_county}{census_api_key}"
