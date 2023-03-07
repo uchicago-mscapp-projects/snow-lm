@@ -36,6 +36,7 @@ def climate_viz():
     ########### Screen 2: Maps ###################
 
     df = get_climate_econ_data(only_2000_onwards = True)
+    df['fed_amount'].round()
     df1 = df.groupby(["year", "state", "state_name"])["total_number_of_events"].sum().reset_index()
     df2 = df.groupby(["year", "state", "state_name"])["fed_amount"].sum().reset_index()
     disaster_types = list(df.disaster_type.unique())
@@ -163,6 +164,7 @@ def climate_viz():
             #Create data table for top five states receiving federal funding
             top5_funding = top_funding[top_funding['state'] == state]
             top_5_assistance = top5_funding.sort_values(by='fed_amount', ascending=False).head(5)
+            top_5_assistance['fed_amount'].round()
             top_5_assistance.drop(['disasterNumber'], axis=1)
 
             top_5_assistance_table = top_5_assistance.to_dict('records')
@@ -283,10 +285,10 @@ def climate_viz():
         [
         html.P(["Choose between the number of disaster events or the public "
         "assistance provided for disaster management to see how their patterns "
-        "have changed between 2000-2022. In general, while there is certainly "
-        "year to year variation, we see that California, "
+        "have changed between 2000-2022. While there is certainly "
+        "year to year variation, in general, we see that California, "
         "Texas, and Florida face the most amount of disasters (not normalized "
-        "by landmass).", html.Strong("Click on a state"
+        "by landmass). ", html.Strong("Click on a state"
         " to get granular state and county-level information!")], 
         ),
         ],
@@ -343,7 +345,7 @@ def climate_viz():
         [
         html.P(" At the county level, we can see in greater detail some information"
             "about the populations in each state and their" 
-            "socioeconomic circumstances. We’ve highlighted some circumstances"
+            " socioeconomic circumstances. We’ve highlighted some circumstances"
             " (such as lack of health insurance and unemployment) that would make"
             " dealing with weather-related disasters especially challenging for "
             " these populations. In the bar charts below, clockwise, we show the"
