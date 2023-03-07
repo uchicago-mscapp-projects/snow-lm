@@ -3,8 +3,17 @@ CAPP 30122
 Team: Snow Laughing Matter
 Author: Shwetha Srinivasan
 
-Code for developing visualizations and final dashboard after data cleaning. 
+Code for developing visualizations and final dashboard after data cleaning.
+
+Sources: 
+https://medium.com/codex/charting-with-plotly-dash-1bc9e25cbd5b
+https://towardsdatascience.com/dash-for-beginners-create-interactive-python-dashboards-338bfcb6ffa4
+https://towardsdatascience.com/creating-an-interactive-dashboard-with-dash-plotly-using-crime-data-a217da841df3
+
+The above mentioned sources have been generally useful as a guide to develop the interactive
+dashboard and visualizations for this project. 
 """
+
 
 import dash
 import dash_bootstrap_components as dbc
@@ -38,7 +47,7 @@ def climate_viz():
     )
     app = dash.Dash(__name__, external_stylesheets=[dbc.themes.SPACELAB, dbc_css])
 
-    ########### Screen 1 Figures ################
+    ########### Screen 1: National Figures ################
     climate_df = get_cleaned_data(
         "snowlm/data/disaster_declarations.csv", only_2000_onwards=False
     )
@@ -60,7 +69,7 @@ def climate_viz():
     fig1.update_xaxes(title_text="Total Number of Disaster Events")
     fig1.update_layout(legend_title="Disaster Types", title_x=0.5)
 
-    ########### Screen 2: Maps ###################
+    ########### Screen 2: State Maps ###################
 
     df = get_climate_econ_data(only_2000_onwards=True)
     df1 = (
@@ -69,7 +78,26 @@ def climate_viz():
         .reset_index()
     )
     df2 = df.groupby(["year", "state", "state_name"])["fed_amount"].sum().reset_index()
-    disaster_types = list(df.disaster_type.unique())
+
+    # Dropdown Menu for Map
+
+    dropdown_options = [
+        {"label": "Total Number of Disaster Events", "value": "map1"},
+        {"label": "Total FEMA Public Assistance Funding", "value": "map2"},
+    ]
+    dropdown = html.Div(
+        [
+            dbc.Label("Select a variable"),
+            dcc.Dropdown(
+                id="dropdown",
+                options=dropdown_options,
+                value="map1",
+            ),
+        ],
+        className="mb-4",
+    )
+
+    # Displays and updates map based on the variable selected from the dropdown menu
 
     @app.callback(
         Output("choropleth-map", "figure"),
@@ -107,7 +135,7 @@ def climate_viz():
 
         return fig2
 
-    ########## Screen 2: Bubble Graph ##########
+    ########## Screen 2: Bubble Graph (Scatterplot) ##########
 
     df_pop = get_climate_econ_pop_data()
 
@@ -145,7 +173,7 @@ def climate_viz():
     table = dash_table.DataTable(
         id="table",
         columns=[{"name": col, "id": col} for col in top_disasters.columns],
-        data=top_disasters.to_dict("records"),
+        data=top_disasters.to_dict("disasters"),
     )
 
     # Top 5 FEMA Assistance Table
@@ -161,12 +189,25 @@ def climate_viz():
     funding_table = dash_table.DataTable(
         id="funding-table",
         columns=[{"name": col, "id": col} for col in top_5_funding.columns],
-        data=top_5_funding.to_dict("records"),
+        data=top_5_funding.to_dict("fema"),
     )
 
     # Function for calculating top 10 worst counties for an indicator
 
     def get_top_10_counties(df, state, col_name, col_name_state, col_name_us, bool_val):
+        '''
+        Returns the top 10 worst counties for a specific census indicator
+        Inputs:
+            df (DataFrame): a census dataset
+            state (str): state selected when interacting with the map
+            col_name (str): column corresponding to county value for
+                chosen indicator
+            col_name_state (str): column corresponding to state value for chosen indicator
+            col_name_us (str): column corresponding to national value for chosen indicator
+            bool_val (boolean): True or False depending on whether the column
+                should be sorted ascending
+        Returns (DataFrame): The top 10 worst counties for chosen indicator
+        '''
         top_10 = df.sort_values(by=col_name, ascending=bool_val).head(10)
         top10_df = top_10[["name_county", col_name]]
         state_data = {
@@ -183,6 +224,15 @@ def climate_viz():
 
     ######## Voting Card #############
     def voting_card(state):
+        '''
+        Calculates the number for senators that voted yes or no
+        for the IRA (Climate Bill) legistation
+
+        Inputs
+            state (str): state selected when interacting with the map
+        
+        Returns (tuple): Number of yes and no votes for the bill for the state
+        '''
         voting_data = scrape_voting_behavior()
         voting_data["state"] = voting_data.index
 
@@ -193,6 +243,8 @@ def climate_viz():
         return yes_vote, no_vote
 
     ############### Callbacks ####################
+    # Displays all the visuals created below based on the state selected on the choropleth map
+
     @app.callback(
         [
             Output("bar-chart", "figure"),
@@ -242,11 +294,11 @@ def climate_viz():
 
             # Create data table for top five disaster events for each state
             top_5 = top_disasters[top_disasters["state"] == state]
-            top_5_table = top_5.to_dict("records")
+            top_5_table = top_5.to_dict("disasters")
 
             # Create data table for top five states receiving federal funding
             top_5_assistance = top_5_funding[top_5_funding["state"] == state]
-            top_5_assistance_table = top_5_assistance.to_dict("records")
+            top_5_assistance_table = top_5_assistance.to_dict("fema")
 
             # Create visuals for county level information from each state
             df_census = api_query()
@@ -359,7 +411,7 @@ def climate_viz():
 
     #################### Layout ######################
 
-    # Text
+    # Text Content for the Page
     header = html.H4(
         "Investigating Patterns of Climate-related Natural Disasters in the United States",
         className="bg-primary text-white p-3 mb-2 text-center",
@@ -572,7 +624,7 @@ def climate_viz():
         style={"color": "black", "font-family": "Garamond", "font-size": "20px"},
     )
 
-    # Section Heading
+    # Section Header Text
 
     intro1_text = html.Div(
         [
@@ -606,22 +658,8 @@ def climate_viz():
         style={"color": "black", "font-family": "Garamond", "font-size": "15px"},
     )
 
-    # Dropdown
-    dropdown_options = [
-        {"label": "Total Number of Disaster Events", "value": "map1"},
-        {"label": "Total FEMA Public Assistance Funding", "value": "map2"},
-    ]
-    dropdown = html.Div(
-        [
-            dbc.Label("Select a variable"),
-            dcc.Dropdown(
-                id="dropdown",
-                options=dropdown_options,
-                value="map1",
-            ),
-        ],
-        className="mb-4",
-    )
+
+    ################ Final App Layout ###################
 
     app.layout = dbc.Container(
         [
