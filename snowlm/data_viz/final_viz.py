@@ -134,35 +134,54 @@ def climate_viz():
 
     ########### Screen 3: State and Census Level Information ###########
 
-    ########### Tables for Top 5 disaster types per state #############
+    # ########### Tables for Top 5 disaster types per state #############
+
+    # # Top 5 Disasters Table
+    # top_disasters = type_of_disasters_by_state(climate_summary)
+    # top_disasters = top_disasters.sort_values(
+    #     by="total_number_of_events", ascending=False
+    # ).head(5)
+
+    # table = dash_table.DataTable(
+    #     id="table",
+    #     columns=[{"name": col, "id": col} for col in top_disasters.columns],
+    #     data=top_disasters.to_dict("records"),
+    # )
+
+    # # Top 5 FEMA Assistance Table
+    # df_econ_impact = clean_disaster_summaries(
+    #     "snowlm/data/PublicAssistanceFundedProjectsSummaries.csv",
+    #     "snowlm/data/disaster_declarations.csv",
+    # )
+    # top_5_funding = top_5_by_public_assistance(df_econ_impact)
+    # top_5_funding = top_5_funding.drop(["disasterNumber"], axis=1)
+    # top_5_funding = top_5_funding.sort_values(by="fed_amount", ascending=False).head(5)
+    # top_5_funding["fed_amount"] = top_5_funding["fed_amount"].astype(int)
+
+    # funding_table = dash_table.DataTable(
+    #     id="funding-table",
+    #     columns=[{"name": col, "id": col} for col in top_5_funding.columns],
+    #     data=top_5_funding.to_dict("records"),
+    # )
 
     # Top 5 Disasters Table
-    top_disasters = type_of_disasters_by_state(climate_summary)
-    top_disasters = top_disasters.sort_values(
-        by="total_number_of_events", ascending=False
-    ).head(5)
-
+    disaster_events = type_of_disasters_by_state(climate_summary)
+    top_disasters = disaster_events.sort_values(by='total_number_of_events', ascending=False).head(5)
     table = dash_table.DataTable(
-        id="table",
-        columns=[{"name": col, "id": col} for col in top_disasters.columns],
-        data=top_disasters.to_dict("records"),
-    )
+                    id='table',
+                    columns=[{'name': col, 'id': col} for col in top_disasters.columns],
+                    data=top_disasters.to_dict('records'),)
 
-    # Top 5 FEMA Assistance Table
-    df_econ_impact = clean_disaster_summaries(
-        "snowlm/data/PublicAssistanceFundedProjectsSummaries.csv",
-        "snowlm/data/disaster_declarations.csv",
-    )
-    top_5_funding = top_5_by_public_assistance(df_econ_impact)
-    top_5_funding = top_5_funding.drop(["disasterNumber"], axis=1)
-    top_5_funding = top_5_funding.sort_values(by="fed_amount", ascending=False).head(5)
-    top_5_funding["fed_amount"] = top_5_funding["fed_amount"].astype(int)
+    # Top 5 Federal Assistance Table
+    df_econ_impact = clean_disaster_summaries("snowlm/data/PublicAssistanceFundedProjectsSummaries.csv", "snowlm/data/disaster_declarations.csv" )
+    top_funding = top_5_by_public_assistance(df_econ_impact)
+    top_5_funding = top_funding.sort_values(by='fed_amount', ascending=False).head(5)
 
     funding_table = dash_table.DataTable(
-        id="funding-table",
-        columns=[{"name": col, "id": col} for col in top_5_funding.columns],
-        data=top_5_funding.to_dict("records"),
-    )
+                            id='funding-table',
+                            columns=[{'name': col, 'id': col} for col in top_5_funding.columns],
+                            data=top_5_funding.to_dict('records'),)
+
 
     # Function for calculating top 10 worst counties for an indicator
 
@@ -240,13 +259,27 @@ def climate_viz():
             fig4.update_yaxes(title_text="Average Number of Days")
             fig4.update_layout(title_x=0.5)
 
-            # Create data table for top five disaster events for each state
-            top_5 = top_disasters[top_disasters["state"] == state]
-            top_5_table = top_5.to_dict("records")
+            # # Create data table for top five disaster events for each state
+            # top_5 = top_disasters[top_disasters["state"] == state]
+            # top_5_table = top_5.to_dict("records")
 
-            # Create data table for top five states receiving federal funding
-            top_5_assistance = top_5_funding[top_5_funding["state"] == state]
-            top_5_assistance_table = top_5_assistance.to_dict("records")
+            # # Create data table for top five states receiving federal funding
+            # top_5_assistance = top_5_funding[top_5_funding["state"] == state]
+            # top_5_assistance_table = top_5_assistance.to_dict("records")
+
+            #Create data table for top five disaster events for each state
+            top5_disasters = disaster_events[disaster_events['state'] == state]
+            top_5 = top5_disasters.sort_values(by='total_number_of_events', ascending=False).head(5)
+
+            top_5_table = top_5.to_dict('records')
+
+            #Create data table for top five states receiving federal funding
+            top5_funding = top_funding[top_funding['state'] == state]
+            top_5_assistance = top5_funding.sort_values(by='fed_amount', ascending=False).head(5)
+            top_5_assistance.drop(['disasterNumber'], axis=1)
+
+            top_5_assistance_table = top_5_assistance.to_dict('records')
+
 
             # Create visuals for county level information from each state
             df_census = api_query()
