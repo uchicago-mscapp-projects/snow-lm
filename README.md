@@ -28,7 +28,7 @@ This project can be run using Poetry. The steps are outlined below.
 
 5. Create an environment variable for the U.S. Census API key: `export CENSUS_API_KEY=YOUR_KEY_HERE`
 
-6. . Run the project: `python3 -m snowlm`
+6. Run the project: `python3 -m snowlm`
 
 It will ask you to open the dash application in the browser to see the interactive dashboard.
 

@@ -174,7 +174,7 @@ def type_of_disasters_by_state(climate_summary):
         climate_top_5 (pandas dataframe): Sum of each disaster
             type by each state, limited to the top 5.  
     '''
-    climate_grouped_by_disasters =  climate_summary.groupby(
+    climate_grouped_by_disasters = climate_summary.groupby(
         ['state', 'disaster_type'], as_index = False)[
         'total_number_of_events'].sum()
     climate_top_5 = climate_grouped_by_disasters.sort_values([
