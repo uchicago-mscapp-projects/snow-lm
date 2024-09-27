@@ -1,17 +1,17 @@
 '''
 CAPP 30122
-Team: Snow Laughing Matter
-Author: Harsh Vardhan Pachisia
+@Team: Snow Laughing Matter
+@Author: Harsh Vardhan Pachisia
 Code for getting final datasets for visuals:
-1. combined climate and economic data 
+1. Combined climate and economic data 
 2. Combined climate, economic and population of state data
 '''
 import pandas as pd
 pd.options.mode.chained_assignment = None
-import numpy as np
 from snowlm.data_analysis.economic_impact import (
-    clean_disaster_summaries)
-from snowlm.data_analysis.climate import *
+    clean_disaster_summaries, aggregate_public_assistance)
+from snowlm.data_analysis.climate import (number_of_disaster_events_by_state,
+                                          get_cleaned_data,get_all_pop)
 
 def get_climate_econ_data(only_2000_onwards):
     '''
@@ -28,16 +28,17 @@ def get_climate_econ_data(only_2000_onwards):
         climate_econ_data: A pandas dataframe that provided climate and economic
             data.
     '''
-    FEMA_obli_by_yr_state_disastertype = clean_disaster_summaries(
+    FEMA_obli_by_yr_state_disastertype = aggregate_public_assistance(
+        clean_disaster_summaries(
     "snowlm/data/PublicAssistanceFundedProjectsSummaries.csv", 
-    "snowlm/data/disaster_declarations.csv")
+    "snowlm/data/disaster_declarations.csv"))
 
     if only_2000_onwards:
         disaster_events_by_state = number_of_disaster_events_by_state(
-            get_cleaned_data("snowlm/data/disaster_declarations.csv", True))
+            get_cleaned_data("snowlm/data/disaster_declarations.csv",True))
     else:
         disaster_events_by_state = number_of_disaster_events_by_state(
-            get_cleaned_data("snowlm/data/disaster_declarations.csv", False))
+            get_cleaned_data("snowlm/data/disaster_declarations.csv",False))
     
     climate_econ_data = disaster_events_by_state.merge(
         FEMA_obli_by_yr_state_disastertype, how='left', 
@@ -69,7 +70,7 @@ def get_climate_econ_pop_data():
         pop_of_state_for_that_year = 0
 
         if not pop_of_state_over_years.empty:
-            pop_of_state_for_that_year= pop_of_state_over_years[year].iloc[0]
+            pop_of_state_for_that_year = pop_of_state_over_years[year].iloc[0]
         climate_econ_pop.at[index,'state_pop'] = pop_of_state_for_that_year
     
     climate_econ_pop['state_pop'] = climate_econ_pop['state_pop'

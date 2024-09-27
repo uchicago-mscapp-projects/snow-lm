@@ -12,6 +12,7 @@ https://www.census.gov/data/developers/data-sets/acs-5year.html
 import pathlib
 import pandas as pd
 import requests
+import os
 
 def api_query():
     '''
@@ -34,7 +35,7 @@ def api_query():
     data_year = "/2021"
 
     #3. Add the dataset name acronym:
-    #https://api.census.gov/data/2019/acs/acs5
+    #https://api.census.gov/data/2021/acs/acs5
     dataset_name_acronym = "/acs/acs5/profile"
 
     #4. Add ?get= to the query:
@@ -42,9 +43,9 @@ def api_query():
     get = "?get="
 
     #5. Add variables:
-    list_of_vars_county = "NAME,DP02_0001E,DP03_0009PE,DP03_0062E,DP03_0099PE,DP02_0067PE,DP05_0037PE,DP05_0038PE,DP05_0039PE,DP05_0044PE,DP05_0052PE,DP05_0057PE,DP05_0058PE"
-    list_of_vars_state = "NAME,DP02_0001E,DP03_0009PE,DP03_0062E,DP03_0099PE,DP02_0067PE"
-    list_of_vars_us = "NAME,DP02_0001E,DP03_0009PE,DP03_0062E,DP03_0099PE,DP02_0067PE"
+    list_of_vars_county = "NAME,DP02_0001E,DP03_0009PE,DP03_0062E,DP03_0099PE,DP02_0068PE,DP05_0037PE,DP05_0038PE,DP05_0039PE,DP05_0044PE,DP05_0052PE,DP05_0057PE,DP05_0058PE"
+    list_of_vars_state = "NAME,DP02_0001E,DP03_0009PE,DP03_0062E,DP03_0099PE,DP02_0068PE"
+    list_of_vars_us = "NAME,DP02_0001E,DP03_0009PE,DP03_0062E,DP03_0099PE,DP02_0068PE"
 
     '''
     See below for descriptions of each variable:
@@ -53,10 +54,10 @@ def api_query():
     #DP02_0001E = total households
 
     #DP03_0009PE = Percent Estimate!!EMPLOYMENT STATUS!!Civilian labor force!!Unemployment Rate
-    #DP03_0062E = Estimate!!INCOME AND BENEFITS (IN 2018 INFLATION-ADJUSTED DOLLARS)!!Total households!!Median household income (dollars)
+    #DP03_0062E = Estimate!!INCOME AND BENEFITS (IN 2021 INFLATION-ADJUSTED DOLLARS)!!Total households!!Median household income (dollars)
     #DP03_0099PE = Percent Estimate!!HEALTH INSURANCE COVERAGE!!Civilian noninstitutionalized population!!No health insurance coverage
 
-    #DP02_0067PE = Percent Estimate!!EDUCATIONAL ATTAINMENT!!Population 25 years and over!!Bachelor's degree or higher
+    #DP02_0068PE = Percent Estimate!!EDUCATIONAL ATTAINMENT!!Population 25 years and over!!Bachelor's degree or higher
 
     #DP05_0037PE = Percent Estimate!!RACE!!Total population!!One race!!White
     #DP05_0038PE = Percent Estimate!!RACE!!Total population!!One race!!Black or African American
@@ -65,6 +66,8 @@ def api_query():
     #DP05_0052PE = Percent Estimate!!RACE!!Total population!!One race!!Native Hawaiian and Other Pacific Islander	
     #DP05_0057PE = Percent Estimate!!RACE!!Total population!!One race!!Some other race
     #DP05_0058PE = 	Percent Estimate!!RACE!!Total population!!Two or more races
+
+    https://api.census.gov/data/2021/acs/acs5/profile/variables.html
     '''
 
     #6. Add geography for county, state, and country:
@@ -73,7 +76,7 @@ def api_query():
     geo_us = "&for=us:*"
 
     #7. Add census API key for this project:
-    census_api_key = "&key=dbaf6b8c0aa053d4df5ae844bba98940952fc50b"
+    census_api_key = "&key=" + os.environ["CENSUS_API_KEY"]
 
     #8. Create f strings
     query_url_county = f"{host_name}{data_year}{dataset_name_acronym}{get}{list_of_vars_county}{geo_county}{census_api_key}"
@@ -89,13 +92,9 @@ def api_query():
     response_county = requests.get(query_url_county)
     response_state = requests.get(query_url_state)
     response_us = requests.get(query_url_us)
-
     census_json_county = response_county.json()
     census_json_state = response_state.json()
     census_json_us = response_us.json()
-    #print(census_json_count)
-    #print(census_json_state)
-    #print(census_json_us)
 
     #Create cleaned and merged pandas dataframe from the three above json files:
     full_census_df = sep_jsons_to_merged_cleaned_dataframes(census_json_county, 
@@ -124,31 +123,20 @@ def sep_jsons_to_merged_cleaned_dataframes(census_json_county, census_json_state
     '''
 
     #Create lists for each dataset's variable names:
-    column_names_county = ["name", "total_households", "percent_unemployed", "median_household_income",
+    column_names_county = ["name_county", "total_households", "percent_unemployed", "median_household_income",
         "without_healthcare_coverage", "bach_or_higher", "percent_white", "percent_blackORaa", 
         "percent_ai_and_an", "percent_asian", "percent_nh_and_pi", "percent_race_other", "percent_race_two_more", "state_code", "county_code"]
 
-    column_names_state = ["name", "total_households_state", "percent_unemployed_state", "median_household_income_state",
+    column_names_state = ["name_state", "total_households_state", "percent_unemployed_state", "median_household_income_state",
         "without_healthcare_coverage_state", "bach_or_higher_state", "state_code"]
 
-    column_names_us = ["name", "total_households_us", "percent_unemployed_us", "median_household_income_us",
+    column_names_us = ["name_country", "total_households_us", "percent_unemployed_us", "median_household_income_us",
         "without_healthcare_coverage_us", "bach_or_higher_us", "country_code"]
 
     #Save each file as a dataframe:
     census_df_county = pd.DataFrame(columns = column_names_county, data = census_json_county[1:])
     census_df_state = pd.DataFrame(columns = column_names_state, data = census_json_state[1:])
     census_df_us = pd.DataFrame(columns = column_names_us, data = census_json_us[1:])
-    print("census_df_county: ", census_df_county.head)
-    print("census_df_state: ", census_df_state.head)
-    print("census_df_us: ", census_df_us.head)
-
-    #REMOVE DIRECTLY BELOW - JUST FOR CHECKING
-    result1 = census_df_county.dtypes
-    result2 = census_df_state.dtypes
-    result3 = census_df_us.dtypes
-    print(result1)
-    print(result2)
-    print(result3)
 
     #Checking variable types and making any revisions necessary to census_df_county:
     clean_census_df_county = clean_county_level_census_data(census_df_county)
@@ -157,25 +145,13 @@ def sep_jsons_to_merged_cleaned_dataframes(census_json_county, census_json_state
     clean_census_df_state = clean_state_level_census_data(census_df_state)
 
     #Checking variable types and making any revisions necessary to census_df_us:
-    clean_census_df_county = clean_us_level_census_data(census_df_us)
+    clean_census_df_us = clean_us_level_census_data(census_df_us)
 
     #Citation for loading in data and changing its types: https://www.youtube.com/watch?v=l47HptzM7ao
 
-    #REMOVE THESE CHECKS LATER:
-    result1 = census_df_county.dtypes
-    result2 = census_df_state.dtypes
-    result3 = census_df_us.dtypes
-    print(result1)
-    print(result2)
-    print(result3)
-
     #Combine census_df_county, census_df_state, and census_df_us into full_census_df
-    census_df_stateANDus = census_df_state.merge(census_df_us, how = "outer", on = "country_code")
-    full_census_df = census_df_county.merge(census_df_stateANDus, how = "outer", on = "state_code")
-
-    #REMOVE THESE CHECKS:
-    #pd.set_option('display.max_columns', None)
-    #full_census_df.head
+    census_df_stateANDus = clean_census_df_state.merge(clean_census_df_us, how = "outer", on = "country_code")
+    full_census_df = clean_census_df_county.merge(census_df_stateANDus, how = "outer", on = "state_code")
 
     #return census_df_county, census_df_state, census_df_us
     return full_census_df
@@ -209,7 +185,20 @@ def clean_county_level_census_data(census_df_county):
     #Add a variable to census_df_county that is a concatenation of the state code and the county code:
     census_df_county["state_and_county_code"] = census_df_county["state_code"] + census_df_county["county_code"]
 
-    return census_df_county
+    #Add a variable to census_df_county that is an alphabetic code for states (e.g., IL, NJ, WI)
+    #(The code in the next 4 lines is a revised version of code written by Jackie Glasheen 
+    #for another dataset in this project)
+    file_path = "snowlm/data/Census_State_codes.txt"
+    state_code_alpha_and_numeric = pd.read_csv(file_path, sep='|')
+    state_code_alpha_and_numeric = state_code_alpha_and_numeric.drop(columns
+        =['STATE_NAME','STATENS'])
+    state_code_alpha_and_numeric = state_code_alpha_and_numeric.rename(columns
+        ={"STATE": "state_code", "STUSAB": "state_code_alpha"})
+    census_df_county["state_code"] = census_df_county["state_code"].astype(int)
+    census_df_county_w_statecodes = pd.merge(census_df_county, 
+        state_code_alpha_and_numeric, how = "left", on = "state_code")
+
+    return census_df_county_w_statecodes
 
 
 
@@ -231,6 +220,7 @@ def clean_state_level_census_data(census_df_state):
     census_df_state["without_healthcare_coverage_state"] = census_df_state["without_healthcare_coverage_state"].astype(float)
     census_df_state["bach_or_higher_state"] = census_df_state["bach_or_higher_state"].astype(float)
     census_df_state["country_code"] = 1
+    census_df_state["state_code"] = census_df_state["state_code"].astype(int)
 
     return census_df_state
 

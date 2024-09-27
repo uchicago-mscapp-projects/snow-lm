@@ -1,7 +1,8 @@
 '''
 CAPP 30122
-Team: Snow Laughing Matter
-Author: Harsh Vardhan Pachisia
+@Team: Snow Laughing Matter
+@Author: Harsh Vardhan Pachisia
+
 Code for cleaning and analyzing the climate datasets from FEMA and
 writing functions to obtain final datasets for each visual. 
 '''
@@ -9,7 +10,7 @@ import pandas as pd
 pd.options.mode.chained_assignment = None
 import numpy as np
 
-def get_cleaned_data(raw_data_path, only_2000_onwards):
+def get_cleaned_data(raw_data_path,only_2000_onwards):
     '''
     Takes in raw data filepath and a boolean to choose only last 20 years of 
         data or data since 1980 and outputs the clean climate related disasters
@@ -39,7 +40,7 @@ def get_cleaned_data(raw_data_path, only_2000_onwards):
     disaster_type_list = disasters.disaster_type.unique().tolist()
 
     #removing non-climate related disasters or climate disasters that are 
-    #repeated (check Jupyter Notebook for further details)
+    #repeated (check climate_eda.py for further details)
     unwanted_disasters = ['Biological','Toxic Substances','Chemical',
                           'Terrorist','Human Cause','Fishing Losses',
                             'Severe Storm(s)']
@@ -66,11 +67,11 @@ def get_cleaned_data(raw_data_path, only_2000_onwards):
     #remove records that have 0's in the county code- they are ones that are 
     # state-wide disasters and are already covered by other rows. 
     climate_cleaned.drop(climate_cleaned[
-        climate_cleaned['county_code'] == 0].index,inplace = True)
+        climate_cleaned['county_code'] == 0].index,inplace=True)
     
     # add state name for readability
     state_names = get_state_names("snowlm/data/Census_State_codes.txt")
-    climate_data = climate_cleaned.merge(state_names, how='left', on = ['state'])
+    climate_data = climate_cleaned.merge(state_names,how='left',on=['state'])
     
     return climate_data
 
@@ -86,8 +87,7 @@ def get_state_names(raw_file_path):
         state_names: A pandas dataframe of state codes and state names. 
     '''
     state_code_lookup_raw = pd.read_csv(raw_file_path,sep='|')
-    state_code_lookup_raw.drop(columns=['STATE',
-        'STATENS'], inplace=True)
+    state_code_lookup_raw.drop(columns=['STATE','STATENS'],inplace=True)
     state_names =  state_code_lookup_raw.rename(
         columns={"STATE_NAME": "state_name", "STUSAB": "state"})
     
@@ -174,7 +174,7 @@ def type_of_disasters_by_state(climate_summary):
         climate_top_5 (pandas dataframe): Sum of each disaster
             type by each state, limited to the top 5.  
     '''
-    climate_grouped_by_disasters =  climate_summary.groupby(
+    climate_grouped_by_disasters = climate_summary.groupby(
         ['state', 'disaster_type'], as_index = False)[
         'total_number_of_events'].sum()
     climate_top_5 = climate_grouped_by_disasters.sort_values([
@@ -271,7 +271,7 @@ def number_of_days_in_dec_disaster(climate_df):
         climate_grouped_by_state['length_of_disaster'], decimals = 1)
     
     # a dict with states as keys and values as the average length of disaster
-    climate_dict= dict(zip(climate_grouped_by_state.state,
+    climate_dict = dict(zip(climate_grouped_by_state.state,
                             climate_grouped_by_state.length_of_disaster))
     
     # add the national average
@@ -319,7 +319,7 @@ def get_pop_across_years(raw_data_path,period_start,period_end):
     pop_period['state_name'] = pop_period["state_name"
                                           ].str.replace(".","",regex= True)
     
-    # get the state names and matching
+    # get the state names and match
     state_names = get_state_names("snowlm/data/Census_State_codes.txt")
     state_name_list = state_names.state_name.values.tolist()
     pop_period = pop_period.loc[pop_period['state_name']
@@ -345,7 +345,7 @@ def get_all_pop():
                                          2020,2022)
 
     #merging all periods together
-    all_pop= pop_2000_2009.merge(pop_2010_2019, how='left', on='state_name')
-    all_pop = all_pop.merge(pop_2020_2022, how='left', on='state_name')
+    all_pop = pop_2000_2009.merge(pop_2010_2019,how='left',on='state_name')
+    all_pop = all_pop.merge(pop_2020_2022,how='left',on='state_name')
     
     return all_pop
